@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/PandaAuth.Shared/PandaAuth.Shared.csproj" />
+  <Project Path="src/PandaAuth.Sdk/PandaAuth.Sdk.csproj" />
+</Solution>
