@@ -10,6 +10,23 @@ PandaAuth 跨进程共享契约层。源码位于 [PandaAuth.Shared](src/PandaAu
 
 本仓不放数据库实体、持久化实现或 SDK。SDK 独立位于 [panda-auth-sdk](https://github.com/PandaLabs2026/panda-auth-sdk)；Server、SDK、Me 通过相对路径引用本仓，改动须核对消费者。
 
+## 协议端点
+
+对外端点契约即 `PandaAuthEndpoints` 中的常量（相对 Issuer 的路径），消费方不得自行复制字面量：
+
+| 常量 | 路径 | 说明 |
+| --- | --- | --- |
+| `Authorization` | `/connect/authorize` | 授权端点 |
+| `Token` | `/connect/token` | 令牌端点 |
+| `Userinfo` | `/connect/userinfo` | 用户信息端点 |
+| `Logout` | `/connect/logout` | 会话结束端点 |
+| `Introspection` | `/connect/introspect` | 令牌自省端点 |
+| `Revocation` | `/connect/revoke` | 令牌吊销端点 |
+| `JsonWebKeySet` | `/.well-known/jwks` | 签名公钥集，即 discovery 文档的 `jwks_uri` |
+| `OpenIdConfiguration` | `/.well-known/openid-configuration` | OIDC discovery 文档 |
+
+上表取值已于 2026-09-16 逐条对生产 discovery 核验一致（8/8）。常量与路径一致不等于端点已通过协议测试。
+
 ## 当前实现与限制
 
 已有共享常量和模型定义，不代表已有完整客户端接入库。本轮未验证跨仓构建或兼容组合；变化影响见各消费仓及能力矩阵。

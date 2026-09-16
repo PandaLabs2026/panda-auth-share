@@ -10,6 +10,23 @@ Cross-process contracts for PandaAuth. [PandaAuth.Shared](src/PandaAuth.Shared) 
 
 This repository contains no database entities, persistence implementation or SDK. The SDK lives in [panda-auth-sdk](https://github.com/PandaLabs2026/panda-auth-sdk). Server, SDK and Me reference Share by relative path; changes require consumer compatibility review.
 
+## Protocol endpoints
+
+The public endpoint contract is the set of constants in `PandaAuthEndpoints` (paths relative to the Issuer); consumers must not copy the literals:
+
+| Constant | Path | Purpose |
+| --- | --- | --- |
+| `Authorization` | `/connect/authorize` | Authorization endpoint |
+| `Token` | `/connect/token` | Token endpoint |
+| `Userinfo` | `/connect/userinfo` | UserInfo endpoint |
+| `Logout` | `/connect/logout` | End-session endpoint |
+| `Introspection` | `/connect/introspect` | Token introspection endpoint |
+| `Revocation` | `/connect/revoke` | Token revocation endpoint |
+| `JsonWebKeySet` | `/.well-known/jwks` | Signing key set, the `jwks_uri` of the discovery document |
+| `OpenIdConfiguration` | `/.well-known/openid-configuration` | OIDC discovery document |
+
+These values were checked one by one against production discovery on 2026-09-16 (8/8). Constants matching paths is not evidence that the endpoints passed protocol tests.
+
 ## Current implementation and limitations
 
 Shared constants and model definitions exist; they are not a complete client integration library. Cross-repository builds and compatibility combinations were not verified in this change; consult consumers and the capability matrix.
