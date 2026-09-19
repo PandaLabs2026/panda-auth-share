@@ -19,6 +19,16 @@ public static class PandaAuthAdminApi
 
     public static string UserResetPassword(string id) => $"{Users}/{id}/reset-password";
 
+    public static string UserRoles(string id) => $"{Users}/{id}/roles";
+
+    public static string UserUnlock(string id) => $"{Users}/{id}/unlock";
+
+    public static string UserProfile(string id) => $"{Users}/{id}/profile";
+
+    public static string UserResetTwoFactor(string id) => $"{Users}/{id}/reset-2fa";
+
+    public static string UserDeactivate(string id) => $"{Users}/{id}/deactivate";
+
     // ---- 客户端管理 ----
     public const string Clients = Prefix + "/clients";
 
@@ -44,11 +54,23 @@ public static class PandaAuthAdminApi
 /// </summary>
 public static class AdminAuditAction
 {
+    public const string UserCreate = "user.create";
+
     public const string UserFreeze = "user.freeze";
 
     public const string UserUnfreeze = "user.unfreeze";
 
     public const string UserResetPassword = "user.reset_password";
+
+    public const string UserUpdateRoles = "user.update_roles";
+
+    public const string UserUnlock = "user.unlock";
+
+    public const string UserUpdateProfile = "user.update_profile";
+
+    public const string UserResetTwoFactor = "user.reset_2fa";
+
+    public const string UserDeactivate = "user.deactivate";
 
     public const string ClientUpdateUris = "client.update_uris";
 
@@ -93,6 +115,29 @@ public sealed record AdminUserStatusRequest(UserStatus Status);
 public sealed record AdminResetPasswordRequest(string? NewPassword);
 
 public sealed record AdminResetPasswordResponse(string Password);
+
+/// <summary>
+/// 管理端建号请求。Password 空/缺省时服务端生成合规随机密码；GrantAdminRole 创建后立即授予 admin 角色。
+/// </summary>
+public sealed record AdminCreateUserRequest(
+    string UserName,
+    string? Email,
+    string? Nickname,
+    string? Region,
+    string? Password,
+    bool GrantAdminRole);
+
+/// <summary>建号响应；Password 仅在服务端生成时返回一次，管理员指定密码时不回传明文。</summary>
+public sealed record AdminCreateUserResponse(string Id, string UserName, string? Email, string? Password);
+
+/// <summary>角色变更请求：全量替换语义——Roles 即目标用户的完整角色集合。</summary>
+public sealed record AdminUserRolesRequest(IReadOnlyList<string> Roles);
+
+/// <summary>资料编辑请求：PUT 全量语义——每个字段都携带最终值，null 即清空。</summary>
+public sealed record AdminUserProfileRequest(string? Email, string? Nickname, string? Region);
+
+/// <summary>注销请求：ConfirmUserName 必须与目标用户名逐字相等（防误触主门禁）。注销为终态。</summary>
+public sealed record AdminDeactivateRequest(string ConfirmUserName);
 
 public sealed record AdminClientSummary(
     string ClientId,
