@@ -29,6 +29,17 @@ public static class PandaAuthAdminApi
 
     public static string UserDeactivate(string id) => $"{Users}/{id}/deactivate";
 
+    // ---- Claims 管理 ----
+    public const string Claims = Prefix + "/claims";
+
+    public static string UserClaims(string userId) => $"{Claims}/users/{userId}";
+
+    public static string UserClaim(string userId, long claimId) => $"{UserClaims(userId)}/{claimId}";
+
+    public static string RoleClaims(string roleId) => $"{Claims}/roles/{roleId}";
+
+    public static string RoleClaim(string roleId, long claimId) => $"{RoleClaims(roleId)}/{claimId}";
+
     // ---- 客户端管理 ----
     public const string Clients = Prefix + "/clients";
 
@@ -77,6 +88,14 @@ public static class AdminAuditAction
     public const string ClientUpdatePermissions = "client.update_permissions";
 
     public const string ClientRotateSecret = "client.rotate_secret";
+
+    public const string UserAddClaim = "user.add_claim";
+
+    public const string UserRemoveClaim = "user.remove_claim";
+
+    public const string RoleAddClaim = "role.add_claim";
+
+    public const string RoleRemoveClaim = "role.remove_claim";
 }
 
 // ---------- DTO（server 序列化、webadmin 反序列化共用；字段即契约） ----------
@@ -138,6 +157,13 @@ public sealed record AdminUserProfileRequest(string? Email, string? Nickname, st
 
 /// <summary>注销请求：ConfirmUserName 必须与目标用户名逐字相等（防误触主门禁）。注销为终态。</summary>
 public sealed record AdminDeactivateRequest(string ConfirmUserName);
+
+/// <summary>自定义 Claims 请求：仅允许服务端校验通过的 panda:* 命名空间和明确 scope。</summary>
+public sealed record AdminClaimRequest(string ClaimType, string ClaimValue, string Scope);
+
+public sealed record AdminUserClaimEntry(long Id, string UserId, string ClaimType, string ClaimValue, string Scope);
+
+public sealed record AdminRoleClaimEntry(long Id, string RoleId, string ClaimType, string ClaimValue, string Scope);
 
 public sealed record AdminClientSummary(
     string ClientId,
