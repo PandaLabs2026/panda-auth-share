@@ -1,0 +1,32 @@
+name: Share CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-pack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore
+        run: dotnet restore PandaAuth.Shared.slnx --nologo -m:1
+      - name: Build
+        run: dotnet build PandaAuth.Shared.slnx --nologo -m:1 --no-restore
+      - name: Pack preview
+        run: dotnet pack src/PandaAuth.Shared/PandaAuth.Shared.csproj --nologo --no-restore -c Release -o artifacts
+      - name: Upload package evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: panda-auth-shared-preview-package
+          path: artifacts/*.nupkg
+          if-no-files-found: error
