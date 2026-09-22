@@ -3,7 +3,23 @@
   <PropertyGroup>
     <RootNamespace>PandaAuth.Shared</RootNamespace>
     <AssemblyName>PandaAuth.Shared</AssemblyName>
-    <IsPackable>false</IsPackable>
+    <IsPackable>true</IsPackable>
+    <PackageId>PandaAuth.Shared</PackageId>
+    <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionSuffix>preview.1</VersionSuffix>
+    <Authors>PandaLabs</Authors>
+    <Company>PandaLabs</Company>
+    <Description>Provider-neutral PandaAuth shared protocol and claims contracts.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/PandaLabs2026/panda-auth-share</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/PandaLabs2026/panda-auth-share.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>panda-auth;openid;oauth2;oidc;contracts</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="README.md" />
+  </ItemGroup>
 
 </Project>
