@@ -13,6 +13,8 @@ public static class PandaAuthAdminApi
     // ---- 用户管理 ----
     public const string Users = Prefix + "/users";
 
+    public const string Roles = Prefix + "/roles";
+
     public static string User(string id) => $"{Users}/{id}";
 
     public static string UserStatus(string id) => $"{Users}/{id}/status";
@@ -110,6 +112,8 @@ public sealed record AdminUserSummary(
     string? Nickname,
     UserStatus Status,
     DateTimeOffset CreatedAt);
+
+public sealed record AdminRoleSummary(string Id, string Name);
 
 public sealed record AdminUserDetail(
     string Id,
