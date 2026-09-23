@@ -1,9 +1,9 @@
 namespace PandaAuth.Shared;
 
 /// <summary>
-/// 管理后台数据 API 的端点契约：webadmin BFF ↔ IDP 的**内部通道**（BFF 直连 IDP
+/// 管理后台数据 API 的端点契约：admin BFF ↔ IDP 的**内部通道**（BFF 直连 IDP
 /// `Auth:IdpInternalBaseAddress`，不经公网与 Caddy）。鉴权为 Bearer Access Token
-/// （OpenIddict Server 方案）+ admin 角色；调用方（webadmin）与实现方（server）共用本常量组，
+/// （OpenIddict Server 方案）+ admin 角色；调用方（admin）与实现方（server）共用本常量组，
 /// 避免 URL 字面量两端漂移。路径刻意避开公网路由前缀（/connect、/account、/admin）。
 /// </summary>
 public static class PandaAuthAdminApi
@@ -63,7 +63,7 @@ public static class PandaAuthAdminApi
 
 /// <summary>
 /// 管理操作审计动作名。只审计**变更**（冻结/重置/改白名单/改权限/轮换密钥），不审计读——
-/// 读操作的量级会把审计表变成访问日志。命名「域.动作」，新增动作时同步 webadmin 展示映射。
+/// 读操作的量级会把审计表变成访问日志。命名「域.动作」，新增动作时同步 admin 展示映射。
 /// </summary>
 public static class AdminAuditAction
 {
@@ -100,7 +100,7 @@ public static class AdminAuditAction
     public const string RoleRemoveClaim = "role.remove_claim";
 }
 
-// ---------- DTO（server 序列化、webadmin 反序列化共用；字段即契约） ----------
+// ---------- DTO（server 序列化、admin 反序列化共用；字段即契约） ----------
 // 序列化走 ASP.NET Core 默认 camelCase JSON；时间统一 DateTimeOffset（ISO 8601）。
 
 public sealed record AdminPageResult<T>(IReadOnlyList<T> Items, int Total, int Page, int PageSize);
