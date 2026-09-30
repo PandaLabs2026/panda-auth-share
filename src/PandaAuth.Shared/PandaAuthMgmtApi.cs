@@ -3,7 +3,6 @@ namespace PandaAuth.Shared;
 /// <summary>
 /// Management API（M0）公开契约：路由、scope 与资源指示器的单一事实源。
 /// 服务端（PandaAuth.Server Features/Management）与消费方统一引用本类，不得复制字面量。
-/// 设计稿见元仓 docs/superpowers/specs/2026-09-27-management-api-m0-design.md。
 /// </summary>
 public static class PandaAuthMgmtApi
 {

@@ -5,8 +5,7 @@ namespace PandaAuth.Shared;
 /// 以下取值为单一事实源：服务端以本类常量注册端点，消费方（Server、SDK、Me）同样引用本类，
 /// 不得在各自仓内复制字面量。
 /// <para>
-/// 核验记录（2026-09-16）：8 个常量已逐条对生产 discovery
-/// （https://auth.pandalabs.cc/.well-known/openid-configuration）核验，8/8 全部一致。
+/// 核验记录：8 个常量已逐条对线上 discovery 文档核验，8/8 全部一致。
 /// </para>
 /// <para>
 /// 注意 <see cref="JsonWebKeySet"/>：它对应 discovery 文档的 <c>jwks_uri</c>，即 OpenIddict 的 JWKS 路由
