@@ -29,7 +29,7 @@ PandaAuth 跨进程共享契约层。源码位于 [PandaAuth.Shared](src/PandaAu
 
 ## 当前实现与限制
 
-已有共享常量和模型定义，不代表已有完整客户端接入库。本仓组件包版本（`VersionPrefix` 1.0.0）按独立 SemVer 推进，不等同于 PandaAuth 套件对外版本；包内包含本 README、根目录 MIT 许可证正文和许可证元数据，尚未发布到 NuGet。变化影响见各消费仓及能力矩阵。
+已有共享常量和模型定义，不代表已有完整客户端接入库。本仓组件包版本（`VersionPrefix` 1.0.0）按独立 SemVer 推进，不等同于 PandaAuth 套件对外版本；包内包含本 README、根目录 MIT 许可证正文和许可证元数据，尚未发布到 NuGet。变化影响见各消费仓。
 
 ## 构建
 

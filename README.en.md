@@ -29,7 +29,7 @@ These values were checked one by one against production discovery on 2026-09-16 
 
 ## Current implementation and limitations
 
-Shared constants and model definitions exist; they are not a complete client integration library. Cross-repository builds and compatibility combinations were not verified in this change; consult consumers and the capability matrix.
+Shared constants and model definitions exist; they are not a complete client integration library. Cross-repository builds and compatibility combinations are not verified here; consult the consumer repositories.
 
 ## Build
 
