@@ -33,7 +33,7 @@ PandaAuth 跨进程共享契约层。源码位于 [PandaAuth.Shared](src/PandaAu
 
 ## 构建
 
-需要 .NET SDK，版本选择见本仓 [global.json](global.json)（当前请求 10.0.112，允许 latestFeature roll-forward）。本仓可脱离私有元仓独立构建。以下命令在本仓根目录执行；本轮仅静态核对命令，未执行构建或启动。
+需要 .NET SDK，版本选择见本仓 [global.json](global.json)（当前请求 10.0.112，允许 latestFeature roll-forward）。本仓可脱离私有元仓独立构建。以下命令在本仓根目录执行。
 
 ```bash
 dotnet build PandaAuth.Shared.slnx

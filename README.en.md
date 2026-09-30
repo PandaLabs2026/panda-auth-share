@@ -33,7 +33,7 @@ Shared constants and model definitions exist; they are not a complete client int
 
 ## Build
 
-Use the .NET SDK selected by [global.json](global.json) (currently 10.0.112 with latestFeature roll-forward). This repository can be built without the private coordination repository. Commands below run from this repository root. They were statically checked, not executed, in this documentation change.
+Use the .NET SDK selected by [global.json](global.json) (currently 10.0.112 with latestFeature roll-forward). This repository can be built without the private coordination repository. Commands below run from this repository root.
 
 ```bash
 dotnet build PandaAuth.Shared.slnx
