@@ -1,0 +1,52 @@
+# panda-auth-share
+
+**PandaAuth by PandaLabs** · [English](README.md)
+
+**官方主页 [pandalabs.cc](https://pandalabs.cc/products/panda-auth/)** · 中文官网 [pandalabs.cn](https://pandalabs.cn/products/panda-auth/) · [PandaLabs 产品矩阵](https://pandalabs.cc/products/)
+
+> PandaAuth 套件当前为 **Community Preview 0.2.0-preview.1**：已部署生产、面向早期社区试用；稳定版 Community Release 1.0.0 尚未发布。接入采用邀请或申请口径。
+
+## 职责与边界
+
+PandaAuth 跨进程共享契约层。源码位于 [PandaAuth.Shared](src/PandaAuth.Shared)，包含用户状态枚举、协议端点及 Claim 常量。
+
+本仓不放数据库实体、持久化实现或 SDK。SDK 独立位于 [panda-auth-sdk](https://github.com/PandaLabs2026/panda-auth-sdk)；Server、SDK、Me 通过相对路径引用本仓，改动须核对消费者。
+
+## 协议端点
+
+对外端点契约即 `PandaAuthEndpoints` 中的常量（相对 Issuer 的路径），消费方不得自行复制字面量：
+
+| 常量 | 路径 | 说明 |
+| --- | --- | --- |
+| `Authorization` | `/connect/authorize` | 授权端点 |
+| `Token` | `/connect/token` | 令牌端点 |
+| `Userinfo` | `/connect/userinfo` | 用户信息端点 |
+| `Logout` | `/connect/logout` | 会话结束端点 |
+| `Introspection` | `/connect/introspect` | 令牌自省端点 |
+| `Revocation` | `/connect/revoke` | 令牌吊销端点 |
+| `JsonWebKeySet` | `/.well-known/jwks` | 签名公钥集，即 discovery 文档的 `jwks_uri` |
+| `OpenIdConfiguration` | `/.well-known/openid-configuration` | OIDC discovery 文档 |
+
+上表取值已于 2026-09-16 逐条对生产 discovery 核验一致（8/8）。常量与路径一致不等于端点已通过协议测试。
+
+## 当前实现与限制
+
+已有共享常量和模型定义，不代表已有完整客户端接入库。本仓组件包版本（`VersionPrefix` 1.0.0）按独立 SemVer 推进，不等同于 PandaAuth 套件对外版本；包内包含本 README、根目录 MIT 许可证正文和许可证元数据，尚未发布到 NuGet。变化影响见各消费仓。
+
+## 构建
+
+需要 .NET SDK，版本选择见本仓 [global.json](global.json)（当前请求 10.0.112，允许 latestFeature roll-forward）。本仓可脱离私有元仓独立构建。以下命令在本仓根目录执行。
+
+```bash
+dotnet build PandaAuth.Shared.slnx
+```
+
+这是库仓，没有独立服务端口或运行入口。对外契约变化应按兼容影响选择 SemVer，并更新消费方说明。
+
+## Roadmap 与治理
+
+产品级路线图、发行门禁和社区/商业边界在正式公开发行前仍由维护者治理；本 README 只描述可独立复现的 Share 构建边界。
+
+- [安全政策](SECURITY.md)：选定私密报告渠道，启用状态未核验；不公开提交漏洞细节。
+- [贡献指南](CONTRIBUTING.md)：本仓检查与统一贡献规则。
+- [MIT License](LICENSE)：适用于自有代码和文档，具体范围见[许可说明](LICENSING.md)；第三方许可仍适用，品牌图片除外。
