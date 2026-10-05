@@ -19,6 +19,17 @@ public readonly record struct TenantId
     }
 }
 
+/// <summary>
+/// 服务器分区标识（拓扑 v2，ADR-056/061 后）：s000 至 s999。租户入口主机名的分区段。
+/// </summary>
+public static class TenantZone
+{
+    private static readonly Regex Pattern = new("^s[0-9]{3}$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
+    public static bool IsValid(string? zone) =>
+        !string.IsNullOrWhiteSpace(zone) && Pattern.IsMatch(zone);
+}
+
 /// <summary>拥有独立租户入口的产品。</summary>
 public enum TenantProduct
 {
@@ -37,31 +48,43 @@ public enum TenantRouteState
     Disabled = 4,
 }
 
-/// <summary>租户 ID、产品和规范主机名的一致性映射。</summary>
+/// <summary>
+/// 租户 ID、产品、分区与规范主机名的一致性映射。
+/// 规范形态（拓扑 v2）：t####-&lt;label&gt;.sNNN.pandalabs.cn，label 按产品取 auth/asst/oasis。
+/// 历史 t####.assistant.pandalabs.cn 系（无分区、应用级域）已随 ADR-061 删 DNS，不再是契约形态。
+/// </summary>
 public static class TenantCanonicalHost
 {
-    public static string For(TenantId tenantId, TenantProduct product) => product switch
+    public static string For(TenantId tenantId, TenantProduct product, string zone)
     {
-        TenantProduct.PandaAuth => $"{tenantId.Value}.auth.pandalabs.cn",
-        TenantProduct.PandaAssistant => $"{tenantId.Value}.assistant.pandalabs.cn",
-        TenantProduct.Oasis => $"{tenantId.Value}.oasis.pandalabs.cn",
-        _ => throw new ArgumentOutOfRangeException(nameof(product), product, "Unknown tenant product."),
-    };
+        if (!TenantZone.IsValid(zone))
+            throw new ArgumentOutOfRangeException(nameof(zone), zone, "Zone must match sNNN.");
+        var label = product switch
+        {
+            TenantProduct.PandaAuth => "auth",
+            TenantProduct.PandaAssistant => "asst",
+            TenantProduct.Oasis => "oasis",
+            _ => throw new ArgumentOutOfRangeException(nameof(product), product, "Unknown tenant product."),
+        };
+        return $"{tenantId.Value}-{label}.{zone}.pandalabs.cn";
+    }
 }
 
 /// <summary>由服务端 hostname/Fleet binding 校验后生成的只读租户上下文。</summary>
 public sealed record TenantContext
 {
-    public TenantContext(TenantId tenantId, TenantProduct product, string canonicalHost,
+    public TenantContext(TenantId tenantId, TenantProduct product, string zone, string canonicalHost,
         long routeRevision, TenantRouteState state)
     {
         if (routeRevision < 1) throw new ArgumentOutOfRangeException(nameof(routeRevision));
-        var expectedHost = TenantCanonicalHost.For(tenantId, product);
+        if (!TenantZone.IsValid(zone)) throw new ArgumentOutOfRangeException(nameof(zone), zone, "Zone must match sNNN (lowercase).");
+        var expectedHost = TenantCanonicalHost.For(tenantId, product, zone);
         if (!string.Equals(expectedHost, canonicalHost, StringComparison.OrdinalIgnoreCase))
-            throw new ArgumentException("Canonical host does not match tenant and product.", nameof(canonicalHost));
+            throw new ArgumentException("Canonical host does not match tenant, product and zone.", nameof(canonicalHost));
 
         TenantId = tenantId;
         Product = product;
+        Zone = zone;
         CanonicalHost = expectedHost;
         RouteRevision = routeRevision;
         State = state;
@@ -69,6 +92,7 @@ public sealed record TenantContext
 
     public TenantId TenantId { get; }
     public TenantProduct Product { get; }
+    public string Zone { get; }
     public string CanonicalHost { get; }
     public long RouteRevision { get; }
     public TenantRouteState State { get; }
