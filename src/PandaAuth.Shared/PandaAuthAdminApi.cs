@@ -6,6 +6,20 @@ namespace PandaAuth.Shared;
 /// （OpenIddict Server 方案）+ admin 角色；调用方（admin）与实现方（server）共用本常量组，
 /// 避免 URL 字面量两端漂移。路径刻意避开公网路由前缀（/connect、/account、/admin）。
 /// </summary>
+/// <remarks>
+/// <para>
+/// 路径构造对路由参数一律 <see cref="Uri.EscapeDataString"/>：参数来自 admin 侧路由解码，
+/// 可含 ?、%、. 等保留字符，裸插值经 HttpClient 的 Uri 规范化可注入 query（? 拆串）或
+/// 干扰路径段（.. 导航）。合法 id（无保留字符）转义后不变，契约行为对既有调用方幂等。
+/// </para>
+/// <para>
+/// **调用方须知（防双重转义）**：传入值必须是**未转义的原始 id**——本契约负责统一转义，
+/// 调用方不得先自行 EscapeDataString 再传入（%2F 会被二次转义成 %252F）。admin BFF 的
+/// 路由值经 ASP.NET 路由**部分解码**（%3F 还原、%2F 保留转义），须先 UnescapeDataString
+/// 还原为原始值再交给本契约（见 admin 仓 Program.cs 的 NormalizeRouteValue）。数值参数
+///（claimId 等）无保留字符可能，不转义。
+/// </para>
+/// </remarks>
 public static class PandaAuthAdminApi
 {
     public const string Prefix = "/admin-api";
@@ -15,30 +29,30 @@ public static class PandaAuthAdminApi
 
     public const string Roles = Prefix + "/roles";
 
-    public static string User(string id) => $"{Users}/{id}";
+    public static string User(string id) => $"{Users}/{Uri.EscapeDataString(id)}";
 
-    public static string UserStatus(string id) => $"{Users}/{id}/status";
+    public static string UserStatus(string id) => $"{Users}/{Uri.EscapeDataString(id)}/status";
 
-    public static string UserResetPassword(string id) => $"{Users}/{id}/reset-password";
+    public static string UserResetPassword(string id) => $"{Users}/{Uri.EscapeDataString(id)}/reset-password";
 
-    public static string UserRoles(string id) => $"{Users}/{id}/roles";
+    public static string UserRoles(string id) => $"{Users}/{Uri.EscapeDataString(id)}/roles";
 
-    public static string UserUnlock(string id) => $"{Users}/{id}/unlock";
+    public static string UserUnlock(string id) => $"{Users}/{Uri.EscapeDataString(id)}/unlock";
 
-    public static string UserProfile(string id) => $"{Users}/{id}/profile";
+    public static string UserProfile(string id) => $"{Users}/{Uri.EscapeDataString(id)}/profile";
 
-    public static string UserResetTwoFactor(string id) => $"{Users}/{id}/reset-2fa";
+    public static string UserResetTwoFactor(string id) => $"{Users}/{Uri.EscapeDataString(id)}/reset-2fa";
 
-    public static string UserDeactivate(string id) => $"{Users}/{id}/deactivate";
+    public static string UserDeactivate(string id) => $"{Users}/{Uri.EscapeDataString(id)}/deactivate";
 
     // ---- Claims 管理 ----
     public const string Claims = Prefix + "/claims";
 
-    public static string UserClaims(string userId) => $"{Claims}/users/{userId}";
+    public static string UserClaims(string userId) => $"{Claims}/users/{Uri.EscapeDataString(userId)}";
 
     public static string UserClaim(string userId, long claimId) => $"{UserClaims(userId)}/{claimId}";
 
-    public static string RoleClaims(string roleId) => $"{Claims}/roles/{roleId}";
+    public static string RoleClaims(string roleId) => $"{Claims}/roles/{Uri.EscapeDataString(roleId)}";
 
     public static string RoleClaim(string roleId, long claimId) => $"{RoleClaims(roleId)}/{claimId}";
 
@@ -47,20 +61,19 @@ public static class PandaAuthAdminApi
 
     public const string ClientOptions = Clients + "/options";
 
-    public static string Client(string clientId) => $"{Clients}/{clientId}";
+    public static string Client(string clientId) => $"{Clients}/{Uri.EscapeDataString(clientId)}";
 
-    public static string ClientRedirectUris(string clientId) => $"{Clients}/{clientId}/redirect-uris";
+    public static string ClientRedirectUris(string clientId) => $"{Clients}/{Uri.EscapeDataString(clientId)}/redirect-uris";
 
-    public static string ClientPermissions(string clientId) => $"{Clients}/{clientId}/permissions";
+    public static string ClientPermissions(string clientId) => $"{Clients}/{Uri.EscapeDataString(clientId)}/permissions";
 
-    public static string ClientRotateSecret(string clientId) => $"{Clients}/{clientId}/rotate-secret";
+    public static string ClientRotateSecret(string clientId) => $"{Clients}/{Uri.EscapeDataString(clientId)}/rotate-secret";
 
     // ---- 审计查询（只读） ----
     public const string AuditLogins = Prefix + "/audit/logins";
 
     public const string AuditAdmin = Prefix + "/audit/admin";
 }
-
 /// <summary>
 /// 管理操作审计动作名。只审计**变更**（冻结/重置/改白名单/改权限/轮换密钥），不审计读——
 /// 读操作的量级会把审计表变成访问日志。命名「域.动作」，新增动作时同步 admin 展示映射。
