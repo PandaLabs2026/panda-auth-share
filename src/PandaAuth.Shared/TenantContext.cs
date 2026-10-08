@@ -51,7 +51,7 @@ public enum TenantRouteState
 /// <summary>
 /// 租户 ID、产品、分区与规范主机名的一致性映射。
 /// 规范形态（拓扑 v2）：t####-&lt;label&gt;.sNNN.pandalabs.cn，label 按产品取 auth/asst/oasis。
-/// 历史 t####.assistant.pandalabs.cn 系（无分区、应用级域）已随 ADR-061 删 DNS，不再是契约形态。
+/// 历史无分区应用级主机已随 ADR-061 退役，不再是契约形态。
 /// </summary>
 public static class TenantCanonicalHost
 {
