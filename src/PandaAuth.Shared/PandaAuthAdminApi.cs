@@ -42,6 +42,10 @@ public static class PandaAuthAdminApi
     // 独立踢下线（仅吊销 OIDC 令牌，不动账号状态/凭据/安全戳）：契约正本见元仓 ADR 2026-10-11。
     public static string UserRevokeTokens(string id) => $"{Users}/{Uri.EscapeDataString(id)}/revoke-tokens";
 
+    // 在线会话只读视图（Valid refresh_token 投影，Payload/ReferenceId 不出服务端）：
+    // 契约正本见元仓 ADR 2026-10-11（admin-user-sessions-and-sorting）。
+    public static string UserSessions(string id) => $"{Users}/{Uri.EscapeDataString(id)}/sessions";
+
     public static string UserProfile(string id) => $"{Users}/{Uri.EscapeDataString(id)}/profile";
 
     public static string UserResetTwoFactor(string id) => $"{Users}/{Uri.EscapeDataString(id)}/reset-2fa";
