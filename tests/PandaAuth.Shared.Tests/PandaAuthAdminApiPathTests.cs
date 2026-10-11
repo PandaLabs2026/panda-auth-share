@@ -45,6 +45,7 @@ public sealed class PandaAuthAdminApiPathTests
         Assert.Equal($"/admin-api/users/{id}/reset-password", PandaAuthAdminApi.UserResetPassword(id));
         Assert.Equal($"/admin-api/users/{id}/roles", PandaAuthAdminApi.UserRoles(id));
         Assert.Equal($"/admin-api/users/{id}/unlock", PandaAuthAdminApi.UserUnlock(id));
+        Assert.Equal($"/admin-api/users/{id}/revoke-tokens", PandaAuthAdminApi.UserRevokeTokens(id));
         Assert.Equal($"/admin-api/users/{id}/profile", PandaAuthAdminApi.UserProfile(id));
         Assert.Equal($"/admin-api/users/{id}/reset-2fa", PandaAuthAdminApi.UserResetTwoFactor(id));
         Assert.Equal($"/admin-api/users/{id}/deactivate", PandaAuthAdminApi.UserDeactivate(id));
