@@ -39,6 +39,9 @@ public static class PandaAuthAdminApi
 
     public static string UserUnlock(string id) => $"{Users}/{Uri.EscapeDataString(id)}/unlock";
 
+    // 独立踢下线（仅吊销 OIDC 令牌，不动账号状态/凭据/安全戳）：契约正本见元仓 ADR 2026-10-11。
+    public static string UserRevokeTokens(string id) => $"{Users}/{Uri.EscapeDataString(id)}/revoke-tokens";
+
     public static string UserProfile(string id) => $"{Users}/{Uri.EscapeDataString(id)}/profile";
 
     public static string UserResetTwoFactor(string id) => $"{Users}/{Uri.EscapeDataString(id)}/reset-2fa";
@@ -91,6 +94,8 @@ public static class AdminAuditAction
     public const string UserUpdateRoles = "user.update_roles";
 
     public const string UserUnlock = "user.unlock";
+
+    public const string UserRevokeTokens = "user.revoke_tokens";
 
     public const string UserUpdateProfile = "user.update_profile";
 
