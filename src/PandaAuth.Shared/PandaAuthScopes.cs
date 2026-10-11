@@ -3,7 +3,7 @@ namespace PandaAuth.Shared;
 /// <summary>
 /// Fleet 控制面 scope 与资源常量。契约正本：元仓 <c>docs/contracts/fleet-lifecycle-v2-proposal.md</c>
 /// （上游 PandaLabs <c>docs/contracts/fleet-lifecycle-v2.schema.json</c>）。
-/// 七个 scope 与 <see cref="FleetApi"/> 资源绑定共同构成控制面授权面；新增 scope 必须先入契约再登记于此。
+/// 控制面 scope 与 <see cref="FleetApi"/> 资源绑定共同构成控制面授权面；新增 scope 必须先入契约再登记于此。
 /// </summary>
 public static class PandaAuthScopes
 {
@@ -31,6 +31,14 @@ public static class PandaAuthScopes
     /// <summary>服务器管理：宿主与 agent 生命周期管理。</summary>
     public const string FleetServerManage = "fleet.server.manage";
 
+    /// <summary>
+    /// 平台操作：服务目录平台运维操作（health/restart/reload）的发起与轻量审批链路。
+    /// fleet-server 的 catalog 端点授权策略与本 scope 字面量耦合（CatalogEndpoints + Program.cs
+    /// AddPolicy("fleet.platform.operate")），admin BFF 经 PandaAuth__ActionScopes 申请之；
+    /// 2026-10-11 隔离 e2e harness 首跑暴露：此前从未登记，令牌永远不含它，写路径恒 403。
+    /// </summary>
+    public const string FleetPlatformOperate = "fleet.platform.operate";
+
     /// <summary>全部 Fleet 控制面 scope，注册（Server）与 seed（DbSeeder）的单一事实源。</summary>
     public static IReadOnlyList<string> FleetAll { get; } =
     [
@@ -41,5 +49,6 @@ public static class PandaAuthScopes
         FleetRetire,
         FleetPurge,
         FleetServerManage,
+        FleetPlatformOperate,
     ];
 }
