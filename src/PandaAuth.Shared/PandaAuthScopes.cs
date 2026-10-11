@@ -1,8 +1,8 @@
 namespace PandaAuth.Shared;
 
 /// <summary>
-/// Fleet 控制面 scope 与资源常量。契约正本：元仓 <c>docs/contracts/fleet-lifecycle-v2-proposal.md</c>
-/// （上游 PandaLabs <c>docs/contracts/fleet-lifecycle-v2.schema.json</c>）。
+/// Fleet 控制面 scope 与资源常量。契约正本：元仓 <c>docs/contracts/fleet-control-plane-scopes.md</c>（2026-10-11 起；
+/// 原 fleet-lifecycle-v2-proposal.md 从未存在，属死指针）。
 /// 控制面 scope 与 <see cref="FleetApi"/> 资源绑定共同构成控制面授权面；新增 scope 必须先入契约再登记于此。
 /// </summary>
 public static class PandaAuthScopes
