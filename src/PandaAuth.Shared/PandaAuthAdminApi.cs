@@ -156,6 +156,17 @@ public sealed record AdminUserDetail(
 /// <summary>冻结 / 解冻请求。只允许 Active 与 Frozen 互转（Deleted 不经此端点）。 </summary>
 public sealed record AdminUserStatusRequest(UserStatus Status);
 
+/// <summary>
+/// 在线会话条目（只读视图）：Valid 状态 refresh_token 令牌的投影。
+/// 刻意不含 Payload/ReferenceId——令牌句柄与密文不出服务端（元仓 ADR 2026-10-11）。
+/// </summary>
+public sealed record AdminUserSession(
+    string Id,
+    string? ClientId,
+    string Type,
+    DateTimeOffset? CreationDate,
+    DateTimeOffset? ExpirationDate);
+
 /// <summary>重置密码请求；NewPassword 缺省时由服务端生成合规随机密码（明文仅返回一次）。 </summary>
 public sealed record AdminResetPasswordRequest(string? NewPassword);
 
