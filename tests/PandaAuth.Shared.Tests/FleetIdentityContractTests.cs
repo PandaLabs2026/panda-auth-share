@@ -4,8 +4,8 @@ using Xunit;
 namespace PandaAuth.Shared.Tests;
 
 /// <summary>
-/// Fleet 控制面身份契约锁线：subject_type 线值与七个控制面 scope 是对外契约，
-/// 与元仓 docs/contracts/fleet-lifecycle-v2-proposal.md 一致；漂移即破坏消费方（Fleet 控制面）。
+/// Fleet 控制面身份契约锁线：subject_type 线值与当前控制面 scope 是对外契约，
+/// 与元仓 docs/contracts/fleet-control-plane-scopes.md 一致；漂移即破坏消费方（Fleet 控制面）。
 /// </summary>
 public sealed class FleetIdentityContractTests
 {
@@ -18,7 +18,7 @@ public sealed class FleetIdentityContractTests
     }
 
     [Fact]
-    public void Fleet_scopes_are_exactly_the_seven_contract_scopes()
+    public void Fleet_scopes_match_the_current_owner_contract()
     {
         Assert.Equal(
         [
@@ -29,6 +29,7 @@ public sealed class FleetIdentityContractTests
             "fleet.retire",
             "fleet.purge",
             "fleet.server.manage",
+            "fleet.platform.operate",
         ], PandaAuthScopes.FleetAll);
     }
 
