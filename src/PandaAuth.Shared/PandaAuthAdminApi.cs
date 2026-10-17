@@ -80,6 +80,11 @@ public static class PandaAuthAdminApi
     public const string AuditLogins = Prefix + "/audit/logins";
 
     public const string AuditAdmin = Prefix + "/audit/admin";
+
+    // ---- 通知中心（管理审计流派生，读侧 + 每管理员已读游标） ----
+    public const string Notifications = Prefix + "/notifications";
+
+    public const string NotificationsCursor = Prefix + "/notifications/cursor";
 }
 /// <summary>
 /// 管理操作审计动作名。只审计**变更**（冻结/重置/改白名单/改权限/轮换密钥），不审计读——
@@ -247,6 +252,27 @@ public sealed record AdminAuditLogEntry(
     string? Detail,
     string? IpAddress,
     DateTimeOffset CreatedAt);
+
+/// <summary>
+/// 通知中心条目：管理审计流的派生读视图（一期仅审计流，动作语义同 <see cref="AdminAuditAction"/>）。
+/// 字段与 AdminAuditLogEntry 对齐——通知是审计的呈现形态，不是第二份存储。
+/// </summary>
+public sealed record AdminNotificationEntry(
+    long Id,
+    string ActorUserId,
+    string? ActorUserName,
+    string Action,
+    string? TargetType,
+    string? TargetId,
+    string? Detail,
+    string? IpAddress,
+    DateTimeOffset CreatedAt);
+
+/// <summary>每管理员已读水位：LastAuditId 及以下的审计条目视为已读。</summary>
+public sealed record AdminSeenCursor(long LastAuditId);
+
+/// <summary>游标写入请求：单调不回退（服务端校验只进不退）。</summary>
+public sealed record AdminSeenCursorRequest(long LastAuditId);
 
 /// <summary>权限目录：服务端 allowlist 的单一事实源，UI 复选组由它驱动（group 为展示分组）。 </summary>
 public sealed record AdminClientOptions(IReadOnlyList<AdminOptionGroup> PermissionGroups);
