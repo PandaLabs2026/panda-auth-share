@@ -69,4 +69,12 @@ public sealed class PandaAuthAdminApiPathTests
             "/admin-api/claims/roles/r%2F1/9",
             PandaAuthAdminApi.RoleClaim("r/1", 9));
     }
+
+    [Fact]
+    public void Notification_paths_are_static_contract_constants()
+    {
+        // 通知中心无路由参数：静态路径即契约，锁住前缀防漂移。
+        Assert.Equal("/admin-api/notifications", PandaAuthAdminApi.Notifications);
+        Assert.Equal("/admin-api/notifications/cursor", PandaAuthAdminApi.NotificationsCursor);
+    }
 }
