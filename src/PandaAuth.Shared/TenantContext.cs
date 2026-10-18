@@ -68,6 +68,54 @@ public static class TenantCanonicalHost
         };
         return $"{tenantId.Value}-{label}.{zone}.pandalabs.cn";
     }
+
+    /// <summary>
+    /// 解析规范租户主机（t####-label.sNNN.pandalabs.cn）。大小写不敏感，容忍单个尾点；
+    /// 端口不属于 Host.Host，调用方不得传入 host:port。非规范形态一律 false。
+    /// </summary>
+    public static bool TryParse(
+        string? host, out TenantId tenantId, out TenantProduct product, out string zone)
+    {
+        tenantId = default;
+        product = default;
+        zone = string.Empty;
+        if (string.IsNullOrWhiteSpace(host)) return false;
+
+        var normalized = host.Trim().TrimEnd('.').ToLowerInvariant();
+        var labels = normalized.Split('.');
+        if (labels.Length != 4 ||
+            !string.Equals(labels[2], "pandalabs", StringComparison.Ordinal) ||
+            !string.Equals(labels[3], "cn", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var head = labels[0];
+        var dash = head.IndexOf('-');
+        if (dash <= 1 || dash == head.Length - 1) return false;
+        try
+        {
+            tenantId = TenantId.Parse(head[..dash]);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+
+        zone = labels[1];
+        if (!TenantZone.IsValid(zone)) return false;
+
+        product = head[(dash + 1)..] switch
+        {
+            "auth" => TenantProduct.PandaAuth,
+            "asst" => TenantProduct.PandaAssistant,
+            "oasis" => TenantProduct.Oasis,
+            _ => (TenantProduct)(-1),
+        };
+        if (!Enum.IsDefined(product)) return false;
+
+        return string.Equals(For(tenantId, product, zone), normalized, StringComparison.Ordinal);
+    }
 }
 
 /// <summary>由服务端 hostname/Fleet binding 校验后生成的只读租户上下文。</summary>
