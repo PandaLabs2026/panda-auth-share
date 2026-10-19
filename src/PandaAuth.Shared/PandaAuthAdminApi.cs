@@ -211,7 +211,9 @@ public sealed record AdminClientSummary(
     string ClientId,
     string? DisplayName,
     string ClientType,
-    string ConsentType);
+    string ConsentType,
+    // 默认 false 保持旧调用点/旧服务端源码兼容；新服务端显式派生 FirstPartyClients.All。
+    bool IsFirstParty = false);
 
 public sealed record AdminClientDetail(
     string ClientId,
@@ -221,7 +223,8 @@ public sealed record AdminClientDetail(
     IReadOnlyList<string> RedirectUris,
     IReadOnlyList<string> PostLogoutRedirectUris,
     IReadOnlyList<string> Permissions,
-    IReadOnlyList<string> Requirements);
+    IReadOnlyList<string> Requirements,
+    bool IsFirstParty = false);
 
 public sealed record AdminRedirectUrisRequest(
     IReadOnlyList<string> RedirectUris,
