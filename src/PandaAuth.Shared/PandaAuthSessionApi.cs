@@ -18,6 +18,8 @@ public static class PandaAuthSessionApi
     public const string SsoCheck = Prefix + "/sso/check";
     public const string SsoRevoke = Prefix + "/sso/revoke";
     // Storage partition, never an OAuth client identity. Legacy client partitions remain isolated.
+    // Gates only new shared revocations. Readers must remain active during recovery.
+    public const string SharedLogoutEnabled = "Auth:SessionState:SharedLogoutEnabled";
     public const string SsoPartition = "sso-session";
     public static readonly TimeSpan SsoRevocationLifetime = TimeSpan.FromDays(30);
 }
