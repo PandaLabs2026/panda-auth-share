@@ -3,7 +3,7 @@ namespace PandaAuth.Shared;
 /// <summary>
 /// 管理后台数据 API 的端点契约：admin BFF ↔ IDP 的**内部通道**（BFF 直连 IDP
 /// `Auth:IdpInternalBaseAddress`，不经公网与 Caddy）。鉴权为 Bearer Access Token
-/// （OpenIddict Server 方案）+ admin 角色；调用方（admin）与实现方（server）共用本常量组，
+/// （OpenIddict Validation 方案）+ 专用 scope/audience/presenter + admin 角色；调用方与实现方共用本常量组，
 /// 避免 URL 字面量两端漂移。路径刻意避开公网路由前缀（/connect、/account、/admin）。
 /// </summary>
 /// <remarks>
@@ -22,6 +22,10 @@ namespace PandaAuth.Shared;
 /// </remarks>
 public static class PandaAuthAdminApi
 {
+    public const string Scope = "auth.admin";
+    public const string Audience = "panda-auth-admin-api";
+    public const string ClientId = "admin-web";
+
     public const string Prefix = "/admin-api";
 
     // ---- 用户管理 ----
