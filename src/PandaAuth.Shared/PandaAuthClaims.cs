@@ -3,6 +3,9 @@ namespace PandaAuth.Shared;
 /// <summary>PandaAuth 自定义 Claim 类型常量（标准 OIDC Claim 用 OpenIddictConstants）。</summary>
 public static class PandaAuthClaims
 {
+    /// <summary>Server-issued account security version, excluded from identity tokens and userinfo.</summary>
+    public const string SecurityVersion = "panda_security_version";
+
     /// <summary>Opaque IDP login-session identifier; only trusted signed identities may supply it.</summary>
     public const string SsoSessionId = "panda:sso_sid";
     /// <summary>用户昵称（profile scope）。</summary>
