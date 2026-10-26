@@ -29,6 +29,12 @@ public static class PandaAuthAdminApi
     public const string Prefix = "/admin-api";
 
     // ---- 用户管理 ----
+    /// <summary>操作授权签发端点（AUTH-DELIVERY-002，Passkey 退役后的高风险操作门禁）。</summary>
+    public const string MfaGrants = Prefix + "/mfa-grants";
+
+    /// <summary>管理域会话探针：返回操作者 totpBound/mfaSatisfied（供 BFF 能力探针转发）。</summary>
+    public const string Session = Prefix + "/session";
+
     public const string Users = Prefix + "/users";
 
     public const string Roles = Prefix + "/roles";
