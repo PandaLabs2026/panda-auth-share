@@ -50,3 +50,5 @@ Product roadmap, release gates and community/commercial boundaries remain mainta
 - [Security](SECURITY.md): selected private reporting channel, enablement unverified; no public vulnerability details.
 - [Contributing](CONTRIBUTING.md): repository-specific checks and the shared contribution policy.
 - [MIT License](LICENSE) for project-owned code/documentation, subject to [license scope](LICENSING.md); third-party terms remain applicable and brand images are excluded.
+
+The additive self-profile proposal exports `PandaAuthProfileApi`, `ProfileScopes`, and private DTOs. PATCH preserves missing versus explicit null; the Server must also validate duplicate properties, values and authorization. These types do not enable an endpoint or grant a client scope. See the owning [API task #323](https://github.com/PandaLabs2026/panda-auth/issues/323).
