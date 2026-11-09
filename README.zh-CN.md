@@ -50,3 +50,5 @@ dotnet build PandaAuth.Shared.slnx
 - [安全政策](SECURITY.md)：选定私密报告渠道，启用状态未核验；不公开提交漏洞细节。
 - [贡献指南](CONTRIBUTING.md)：本仓检查与统一贡献规则。
 - [MIT License](LICENSE)：适用于自有代码和文档，具体范围见[许可说明](LICENSING.md)；第三方许可仍适用，品牌图片除外。
+
+新增本人资料契约由 `PandaAuthProfileApi`、`ProfileScopes` 与私有 DTO 导出。PATCH 保留缺省与显式 null 的区别；Server 仍须验证重复属性、值及授权。这些类型不代表端点已启用或客户端已获 scope，见[拥有方任务 #323](https://github.com/PandaLabs2026/panda-auth/issues/323)。
