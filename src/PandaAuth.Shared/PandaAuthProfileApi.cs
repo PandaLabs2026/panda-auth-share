@@ -11,8 +11,10 @@ public static class PandaAuthProfileApi
     public const string ContactEmail = Self + "/contact-email";
     public const string ContactEmailChallenges = ContactEmail + "/challenges";
     public const string ContactEmailConfirmation = ContactEmail + "/confirmation";
-    public const string SelfOrganization = Self + "/organizations/{organizationKey}";
-    public const string OrganizationMember = "/api/profile/v1/organizations/{organizationKey}/members/{memberKey}";
+    public const string SelfOrganizations = Self + "/organizations";
+    public const string Organizations = "/api/profile/v1/organizations";
+    public const string SelfOrganization = SelfOrganizations + "/{organizationKey}";
+    public const string OrganizationMember = Organizations + "/{organizationKey}/members/{memberKey}";
     public const string OrganizationAvatar = OrganizationMember + "/avatar";
 }
 
