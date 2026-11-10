@@ -11,7 +11,34 @@ public static class PandaAuthProfileApi
     public const string ContactEmail = Self + "/contact-email";
     public const string ContactEmailChallenges = ContactEmail + "/challenges";
     public const string ContactEmailConfirmation = ContactEmail + "/confirmation";
+    public const string SelfOrganization = Self + "/organizations/{organizationKey}";
+    public const string OrganizationMember = "/api/profile/v1/organizations/{organizationKey}/members/{memberKey}";
+    public const string OrganizationAvatar = OrganizationMember + "/avatar";
 }
+
+/// <summary>Only these profile fields can be explicitly shared with a registered organization.</summary>
+public static class ProfileFields
+{
+    public const string DisplayName = "displayName";
+    public const string Avatar = "avatar";
+    public const string Biography = "biography";
+    public const string ContactEmail = "contactEmail";
+}
+
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+public sealed record ProfileOrganizationSelectionRequest(
+    [property: JsonPropertyName("fields"), JsonRequired] string[] Fields);
+
+public sealed record ProfileOrganizationSelectionDto(
+    [property: JsonPropertyName("fields")] string[] Fields,
+    [property: JsonPropertyName("revision")] string Revision);
+
+/// <summary>Filtered audience view: no immutable account reference or private verification/revision metadata.</summary>
+public sealed record OrganizationProfileDto(
+    [property: JsonPropertyName("displayName"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? DisplayName,
+    [property: JsonPropertyName("biography"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Biography,
+    [property: JsonPropertyName("avatar"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? Avatar,
+    [property: JsonPropertyName("contactEmail"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? ContactEmail);
 
 public static class ProfileScopes
 {
