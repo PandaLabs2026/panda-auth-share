@@ -52,3 +52,7 @@ Product roadmap, release gates and community/commercial boundaries remain mainta
 - [MIT License](LICENSE) for project-owned code/documentation, subject to [license scope](LICENSING.md); third-party terms remain applicable and brand images are excluded.
 
 The additive self-profile proposal exports `PandaAuthProfileApi`, `ProfileScopes`, and private DTOs. PATCH preserves missing versus explicit null; the Server must also validate duplicate properties, values and authorization. These types do not enable an endpoint or grant a client scope. See the owning [API task #323](https://github.com/PandaLabs2026/panda-auth/issues/323).
+
+## Cloud control-plane scope source
+
+`CloudControlScopes` adds resource read/manage, safe summary read and read-only check scopes bound to the existing `fleet-api` audience. They are separate from the original `PandaAuthScopes.FleetAll` list. Client permission and Service object grants remain independent. See the [Auth owner contract](https://github.com/PandaLabs2026/panda-auth/blob/main/docs/contracts/cloud-control-identity.md) and [Meta #622](https://github.com/PandaLabs2026/meta/issues/622). This source addition leaves existing published packages unchanged.
