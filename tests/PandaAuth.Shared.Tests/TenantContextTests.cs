@@ -11,9 +11,9 @@ public sealed class TenantContextTests
         var tenant = TenantId.Parse("t0042");
 
         Assert.Equal("t0042", tenant.Value);
-        Assert.Equal("t0042-auth.s001.pandalabs.cn", TenantCanonicalHost.For(tenant, TenantProduct.PandaAuth, "s001"));
-        Assert.Equal("t0042-asst.s002.pandalabs.cn", TenantCanonicalHost.For(tenant, TenantProduct.PandaAssistant, "s002"));
-        Assert.Equal("t0042-oasis.s001.pandalabs.cn", TenantCanonicalHost.For(tenant, TenantProduct.PandaOasis, "s001"));
+        Assert.Equal("t0042-auth.s001.pandacloud.cc", TenantCanonicalHost.For(tenant, TenantProduct.PandaAuth, "s001"));
+        Assert.Equal("t0042-asst.s002.pandacloud.cc", TenantCanonicalHost.For(tenant, TenantProduct.PandaAssistant, "s002"));
+        Assert.Equal("t0042-oasis.s001.pandacloud.cc", TenantCanonicalHost.For(tenant, TenantProduct.PandaOasis, "s001"));
     }
 
     [Theory]

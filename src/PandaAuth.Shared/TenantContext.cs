@@ -87,7 +87,8 @@ public static class TenantCanonicalHost
         zone = string.Empty;
         if (string.IsNullOrWhiteSpace(host)) return false;
 
-        var normalized = host.Trim().TrimEnd('.').ToLowerInvariant();
+        var normalized = host.Trim().ToLowerInvariant();
+        if (normalized.EndsWith('.')) normalized = normalized[..^1];
         var labels = normalized.Split('.');
         if (labels.Length != 4 ||
             !((string.Equals(labels[2], "pandacloud", StringComparison.Ordinal) && string.Equals(labels[3], "cc", StringComparison.Ordinal))
@@ -99,28 +100,32 @@ public static class TenantCanonicalHost
         var head = labels[0];
         var dash = head.IndexOf('-');
         if (dash <= 1 || dash == head.Length - 1) return false;
+        TenantId parsedTenant;
         try
         {
-            tenantId = TenantId.Parse(head[..dash]);
+            parsedTenant = TenantId.Parse(head[..dash]);
         }
         catch (FormatException)
         {
             return false;
         }
 
-        zone = labels[1];
-        if (!TenantZone.IsValid(zone)) return false;
+        var parsedZone = labels[1];
+        if (!TenantZone.IsValid(parsedZone)) return false;
 
-        product = head[(dash + 1)..] switch
+        var parsedProduct = head[(dash + 1)..] switch
         {
             "auth" => TenantProduct.PandaAuth,
             "asst" => TenantProduct.PandaAssistant,
             "oasis" => TenantProduct.PandaOasis,
             _ => (TenantProduct)(-1),
         };
-        if (!Enum.IsDefined(product)) return false;
+        if (!Enum.IsDefined(parsedProduct)) return false;
 
-        return string.Equals(For(tenantId, product, zone), normalized, StringComparison.Ordinal);
+        tenantId = parsedTenant;
+        product = parsedProduct;
+        zone = parsedZone;
+        return true;
     }
 }
 
