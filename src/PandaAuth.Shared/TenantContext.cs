@@ -35,7 +35,7 @@ public enum TenantProduct
 {
     PandaAuth = 0,
     PandaAssistant = 1,
-    Oasis = 2,
+    PandaOasis = 2,
 }
 
 /// <summary>Fleet 租户入口绑定状态。</summary>
@@ -115,7 +115,7 @@ public static class TenantCanonicalHost
         {
             "auth" => TenantProduct.PandaAuth,
             "asst" => TenantProduct.PandaAssistant,
-            "oasis" => TenantProduct.Oasis,
+            "oasis" => TenantProduct.PandaOasis,
             _ => (TenantProduct)(-1),
         };
         if (!Enum.IsDefined(product)) return false;
