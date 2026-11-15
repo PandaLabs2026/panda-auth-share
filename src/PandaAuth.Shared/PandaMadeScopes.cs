@@ -15,14 +15,19 @@ public static class PandaMadeScopes
     /// </summary>
     public const string Issuer = "https://auth.pandamade.net/";
 
-    /// <summary>Platform-level cloud auth issuer (ADR-089 regular value; trailing slash is part of the contract).</summary>
-    public const string CloudIssuer = "https://auth.appliket.com/";
+    /// <summary>Platform-level cloud auth issuer (ADR-089 regular value; trailing slash is part of the contract).
+    /// ④auth/issuer 原子批(形状 v2 序列④,2026-11-15):正典迁 auth.pandacloud.cc。</summary>
+    public const string CloudIssuer = "https://auth.pandacloud.cc/";
 
-    /// <summary>Consumer-side valid issuer allowlist: standalone rollback anchor + cloud auth. Fail-closed; extending it requires a share release.</summary>
+    /// <summary>迁移过渡期退役 issuer(旧 token/StaffGrants 存量);F 终局退役批移出白名单。</summary>
+    public const string RetiredCloudIssuer = "https://auth.appliket.com/";
+
+    /// <summary>Consumer-side valid issuer allowlist: standalone rollback anchor + cloud auth(+迁移过渡旧值). Fail-closed; extending it requires a share release.</summary>
     public static readonly IReadOnlySet<string> KnownIssuers = new HashSet<string>(StringComparer.Ordinal)
     {
         Issuer,
         CloudIssuer,
+        RetiredCloudIssuer,
     };
 
     public const string AdminClient = "pandamade-admin";
