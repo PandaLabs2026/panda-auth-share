@@ -56,3 +56,7 @@ The additive self-profile proposal exports `PandaAuthProfileApi`, `ProfileScopes
 ## Cloud control-plane scope source
 
 `CloudControlScopes` adds resource read/manage, safe summary read and read-only check scopes bound to the existing `fleet-api` audience. They are separate from the original `PandaAuthScopes.FleetAll` list. Client permission and Service object grants remain independent. See the [Auth owner contract](https://github.com/PandaLabs2026/panda-auth/blob/main/docs/contracts/cloud-control-identity.md) and [Meta #622](https://github.com/PandaLabs2026/meta/issues/622). This source addition leaves existing published packages unchanged.
+
+## Tenant host compatibility (source 1.0.1)
+
+`TenantCanonicalHost.For` generates `t####-{auth,asst,oasis}.sNNN.pandacloud.cc`. During the owning migration window, `TryParse` also accepts the corresponding `pandalabs.cn` suffix, case-insensitively and with at most one terminal dot. It returns the same tenant/product/zone; it grants no route binding, issuer alias or OAuth redirect authorization. `TenantContext` still requires the canonical generated host. Retiring the old parser suffix belongs to the owning migration task after consumer/binding/traffic evidence, not to this compatibility fix. Source 1.0.1 is not a package publication.
