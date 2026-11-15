@@ -50,11 +50,17 @@ public enum TenantRouteState
 
 /// <summary>
 /// 租户 ID、产品、分区与规范主机名的一致性映射。
-/// 规范形态（拓扑 v2）：t####-&lt;label&gt;.sNNN.pandalabs.cn，label 按产品取 auth/asst/oasis。
+/// 规范形态（拓扑 v2 / ⑤租户平移 2026-11-15）：t####-&lt;label&gt;.sNNN.pandacloud.cc，label 按产品取 auth/asst/oasis。
+/// 迁移窗口内 sNNN.pandalabs.cn 旧后缀仍在解析白名单（F 退役批移出）。
 /// 历史无分区应用级主机已随 ADR-061 退役，不再是契约形态。
 /// </summary>
 public static class TenantCanonicalHost
 {
+    /// <summary>租户 zone 正典后缀（⑤平移后）。</summary>
+    public const string ZoneSuffix = "pandacloud.cc";
+    /// <summary>迁移窗口退役后缀（解析侧仍在白名单；F 批移出）。</summary>
+    public const string RetiredZoneSuffix = "pandalabs.cn";
+
     public static string For(TenantId tenantId, TenantProduct product, string zone)
     {
         if (!TenantZone.IsValid(zone))
@@ -63,14 +69,14 @@ public static class TenantCanonicalHost
         {
             TenantProduct.PandaAuth => "auth",
             TenantProduct.PandaAssistant => "asst",
-            TenantProduct.Oasis => "oasis",
+            TenantProduct.PandaOasis => "oasis",
             _ => throw new ArgumentOutOfRangeException(nameof(product), product, "Unknown tenant product."),
         };
-        return $"{tenantId.Value}-{label}.{zone}.pandalabs.cn";
+        return $"{tenantId.Value}-{label}.{zone}.{ZoneSuffix}";
     }
 
     /// <summary>
-    /// 解析规范租户主机（t####-label.sNNN.pandalabs.cn）。大小写不敏感，容忍单个尾点；
+    /// 解析规范租户主机（t####-label.sNNN.<新|旧后缀>）。大小写不敏感，容忍单个尾点；
     /// 端口不属于 Host.Host，调用方不得传入 host:port。非规范形态一律 false。
     /// </summary>
     public static bool TryParse(
@@ -84,8 +90,8 @@ public static class TenantCanonicalHost
         var normalized = host.Trim().TrimEnd('.').ToLowerInvariant();
         var labels = normalized.Split('.');
         if (labels.Length != 4 ||
-            !string.Equals(labels[2], "pandalabs", StringComparison.Ordinal) ||
-            !string.Equals(labels[3], "cn", StringComparison.Ordinal))
+            !((string.Equals(labels[2], "pandacloud", StringComparison.Ordinal) && string.Equals(labels[3], "cc", StringComparison.Ordinal))
+              || (string.Equals(labels[2], "pandalabs", StringComparison.Ordinal) && string.Equals(labels[3], "cn", StringComparison.Ordinal))))
         {
             return false;
         }
