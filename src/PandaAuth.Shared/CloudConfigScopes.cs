@@ -7,7 +7,7 @@ namespace PandaAuth.Shared;
 /// </summary>
 public static class CloudConfigScopes
 {
-    public const string Issuer = "https://auth.appliket.com/";
+    public const string Issuer = "https://auth.pandacloud.cc/";
     public const string Audience = "panda-cloud-config";
     public const string IntrospectionClient = "cloud-config-api";
 
