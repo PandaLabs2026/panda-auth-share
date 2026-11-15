@@ -10,7 +10,7 @@ public sealed class TenantCanonicalHostTests
     [InlineData("T0042-AUTH.S001.PANDALABS.CN", "t0042", TenantProduct.PandaAuth, "s001")]
     [InlineData("t0042-auth.s001.pandalabs.cn.", "t0042", TenantProduct.PandaAuth, "s001")]
     [InlineData("t0042-asst.s002.pandalabs.cn", "t0042", TenantProduct.PandaAssistant, "s002")]
-    [InlineData("t0042-oasis.s003.pandalabs.cn", "t0042", TenantProduct.Oasis, "s003")]
+    [InlineData("t0042-oasis.s003.pandalabs.cn", "t0042", TenantProduct.PandaOasis, "s003")]
     public void Parses_canonical_hosts(
         string host, string tenant, TenantProduct product, string zone)
     {
