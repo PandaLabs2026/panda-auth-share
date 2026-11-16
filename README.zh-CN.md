@@ -31,11 +31,11 @@ PandaAuth 跨进程共享契约层。源码位于 [PandaAuth.Shared](src/PandaAu
 
 ## 当前实现与限制
 
-已有共享常量和模型定义，不代表已有完整客户端接入库。本仓组件包版本（`VersionPrefix` 1.0.0）按独立 SemVer 推进，不等同于 PandaAuth 套件对外版本；包内包含本 README、根目录 MIT 许可证正文和许可证元数据，尚未发布到 NuGet。变化影响见各消费仓。
+已有共享常量和模型定义，不代表已有完整客户端接入库。本仓组件包当前为 **0.2.0-preview.1** 源码候选；首个正式市场版前遵循组织0.x政策。包内包含本README及MIT许可证正文/元数据，公开供包另需发行接受；旧1.x材料保留历史身份。变化影响见各消费仓。
 
 ## 构建
 
-需要 .NET SDK，版本选择见本仓 [global.json](global.json)（当前请求 10.0.112，允许 latestFeature roll-forward）。本仓可脱离私有元仓独立构建。以下命令在本仓根目录执行。
+需要 .NET SDK，版本选择见本仓 [global.json](global.json)（10.0.404，精确匹配稳定SDK）。本仓可脱离私有元仓独立构建。以下命令在本仓根目录执行。
 
 ```bash
 dotnet build PandaAuth.Shared.slnx
@@ -52,3 +52,7 @@ dotnet build PandaAuth.Shared.slnx
 - [MIT License](LICENSE)：适用于自有代码和文档，具体范围见[许可说明](LICENSING.md)；第三方许可仍适用，品牌图片除外。
 
 新增本人资料契约由 `PandaAuthProfileApi`、`ProfileScopes` 与私有 DTO 导出。PATCH 保留缺省与显式 null 的区别；Server 仍须验证重复属性、值及授权。这些类型不代表端点已启用或客户端已获 scope，见[拥有方任务 #323](https://github.com/PandaLabs2026/panda-auth/issues/323)。
+
+## 当前预发布版本与F2主机契约
+
+当前源码候选0.2.0-preview.1；包消费显式精确选择 `[0.2.0-preview.1]`。F2已收口：For输出pandacloud.cc，TryParse拒绝退役pandalabs.cn后缀；TenantContext仍要求规范地址。PandaMade的RetiredCloudIssuer不在KnownIssuers。版本重定基不恢复退役主机或扩大issuer/redirect信任。
