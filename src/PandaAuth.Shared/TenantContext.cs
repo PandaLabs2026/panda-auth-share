@@ -5,7 +5,7 @@ namespace PandaAuth.Shared;
 /// <summary>全局租户标识，固定为 t0000 至 t9999。</summary>
 public readonly record struct TenantId
 {
-    private static readonly Regex Pattern = new("^t[0-9]{4}$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+    private static readonly Regex Pattern = new(@"\At[0-9]{4}\z", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     private TenantId(string value) => Value = value;
 
@@ -24,7 +24,7 @@ public readonly record struct TenantId
 /// </summary>
 public static class TenantZone
 {
-    private static readonly Regex Pattern = new("^s[0-9]{3}$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+    private static readonly Regex Pattern = new(@"\As[0-9]{3}\z", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     public static bool IsValid(string? zone) =>
         !string.IsNullOrWhiteSpace(zone) && Pattern.IsMatch(zone);

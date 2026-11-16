@@ -17,6 +17,7 @@ public sealed class TenantContextTests
     }
 
     [Theory]
+    [InlineData("t0042\n")]
     [InlineData("t42")]
     [InlineData("t00000")]
     [InlineData("T0042")]
@@ -27,6 +28,7 @@ public sealed class TenantContextTests
     }
 
     [Theory]
+    [InlineData("s001\n")]
     [InlineData("s1")]
     [InlineData("s00001")]
     [InlineData("S001")]
