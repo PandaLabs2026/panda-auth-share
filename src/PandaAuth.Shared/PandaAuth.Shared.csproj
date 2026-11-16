@@ -5,7 +5,8 @@
     <AssemblyName>PandaAuth.Shared</AssemblyName>
     <IsPackable>true</IsPackable>
     <PackageId>PandaAuth.Shared</PackageId>
-    <VersionPrefix>1.0.1</VersionPrefix>
+    <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionSuffix>preview.1</VersionSuffix>
     <Authors>PandaLabs</Authors>
     <Company>PandaLabs</Company>
     <Description>Provider-neutral PandaAuth shared protocol and claims contracts.</Description>
