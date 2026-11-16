@@ -63,6 +63,8 @@ public static class TenantCanonicalHost
 
     public static string For(TenantId tenantId, TenantProduct product, string zone)
     {
+        if (tenantId.Value is null)
+            throw new ArgumentException("Tenant ID must be initialized through Parse.", nameof(tenantId));
         if (!TenantZone.IsValid(zone))
             throw new ArgumentOutOfRangeException(nameof(zone), zone, "Zone must match sNNN.");
         var label = product switch
