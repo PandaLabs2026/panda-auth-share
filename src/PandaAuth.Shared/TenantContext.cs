@@ -93,8 +93,8 @@ public static class TenantCanonicalHost
         if (normalized.EndsWith('.')) normalized = normalized[..^1];
         var labels = normalized.Split('.');
         if (labels.Length != 4 ||
-            !((string.Equals(labels[2], "pandacloud", StringComparison.Ordinal) && string.Equals(labels[3], "cc", StringComparison.Ordinal))
-              || (string.Equals(labels[2], "pandalabs", StringComparison.Ordinal) && string.Equals(labels[3], "cn", StringComparison.Ordinal))))
+            !string.Equals(labels[2], "pandacloud", StringComparison.Ordinal) ||
+            !string.Equals(labels[3], "cc", StringComparison.Ordinal)) // F2 收口:旧后缀已随旧通配删除不可达(2026-11-16)
         {
             return false;
         }

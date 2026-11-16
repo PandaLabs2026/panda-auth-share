@@ -9,11 +9,6 @@ public sealed class TenantCanonicalHostTests
     [InlineData("t0042-auth.s001.pandacloud.cc", "t0042", TenantProduct.PandaAuth, "s001")]
     [InlineData("t9999-asst.s999.pandacloud.cc", "t9999", TenantProduct.PandaAssistant, "s999")]
     [InlineData("t0000-oasis.s000.pandacloud.cc", "t0000", TenantProduct.PandaOasis, "s000")]
-    [InlineData("t0042-auth.s001.pandalabs.cn", "t0042", TenantProduct.PandaAuth, "s001")]
-    [InlineData("T0042-AUTH.S001.PANDALABS.CN", "t0042", TenantProduct.PandaAuth, "s001")]
-    [InlineData("t0042-auth.s001.pandalabs.cn.", "t0042", TenantProduct.PandaAuth, "s001")]
-    [InlineData("t0042-asst.s002.pandalabs.cn", "t0042", TenantProduct.PandaAssistant, "s002")]
-    [InlineData("t0042-oasis.s003.pandalabs.cn", "t0042", TenantProduct.PandaOasis, "s003")]
     public void Parses_canonical_hosts(
         string host, string tenant, TenantProduct product, string zone)
     {
@@ -26,6 +21,7 @@ public sealed class TenantCanonicalHostTests
 
     [Theory]
     [InlineData("")]
+    [InlineData("t0042-auth.s001.pandalabs.cn")] // F2 收口:旧后缀已随旧通配 DNS 删除不可达
     [InlineData("t0042-auth.s001.pandalabs.cn..")]
     [InlineData("t0042-auth.s001.pandacloud.cc.attacker.test")]
     [InlineData("t0042-auth.s001.pandacloud.cn")]
