@@ -27,8 +27,7 @@ public static class PandaMadeScopes
     {
         Issuer,
         CloudIssuer,
-        RetiredCloudIssuer,
-    };
+    }; // F2 收口(2026-11-16):RetiredCloudIssuer 已移出——旧 token 于 ④原子批全失效,无存量消费方
 
     public const string AdminClient = "pandamade-admin";
     public const string Api = "pandamade-api";
