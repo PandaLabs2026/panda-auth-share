@@ -16,6 +16,22 @@ public sealed class TenantContextTests
         Assert.Equal("t0042-oasis.s001.pandacloud.cc", TenantCanonicalHost.For(tenant, TenantProduct.PandaOasis, "s001"));
     }
 
+    [Fact]
+    public void Canonical_host_rejects_uninitialized_tenant_id()
+    {
+        var error = Assert.Throws<ArgumentException>(() =>
+            TenantCanonicalHost.For(default, TenantProduct.PandaAuth, "s001"));
+        Assert.Equal("tenantId", error.ParamName);
+    }
+
+    [Fact]
+    public void Context_rejects_uninitialized_tenant_even_with_matching_empty_host()
+    {
+        Assert.Throws<ArgumentException>(() => new TenantContext(
+            default, TenantProduct.PandaAuth, "s001", "-auth.s001.pandacloud.cc",
+            1, TenantRouteState.Ready));
+    }
+
     [Theory]
     [InlineData("t0042\n")]
     [InlineData("t42")]
