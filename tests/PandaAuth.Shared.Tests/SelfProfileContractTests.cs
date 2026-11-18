@@ -17,6 +17,22 @@ public sealed class SelfProfileContractTests
         Assert.Equal(JsonValueKind.Null, json.RootElement.GetProperty("displayName").ValueKind);
         Assert.Equal("none", json.RootElement.GetProperty("contactEmail").GetProperty("state").GetString());
         Assert.Equal("\"0\"", json.RootElement.GetProperty("revision").GetString());
+        Assert.False(json.RootElement.GetProperty("contactEmail").TryGetProperty("pendingVerification", out _));
+    }
+
+    [Fact]
+    public void Pending_contact_verification_serializes_only_the_locator_and_expiry()
+    {
+        var expires = new DateTimeOffset(2026, 11, 18, 10, 0, 0, TimeSpan.Zero);
+        var id = Guid.Parse("aebd84ff-3eb2-4325-aa24-f34108d8c231");
+        var contact = new ProfileContactEmailDto("owner@example.invalid", ProfileContactEmailState.Pending,
+            new PendingContactVerificationDto(id, expires));
+        using var json = JsonDocument.Parse(JsonSerializer.Serialize(contact));
+        var pending = json.RootElement.GetProperty("pendingVerification");
+
+        Assert.Equal(["challengeId", "expiresAt"], pending.EnumerateObject().Select(property => property.Name));
+        Assert.Equal(id, pending.GetProperty("challengeId").GetGuid());
+        Assert.Equal(expires, pending.GetProperty("expiresAt").GetDateTimeOffset());
     }
 
     [Fact]
