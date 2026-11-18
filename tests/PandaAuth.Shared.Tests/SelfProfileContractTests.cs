@@ -25,8 +25,8 @@ public sealed class SelfProfileContractTests
     {
         var expires = new DateTimeOffset(2026, 11, 18, 10, 0, 0, TimeSpan.Zero);
         var id = Guid.Parse("aebd84ff-3eb2-4325-aa24-f34108d8c231");
-        var contact = new ProfileContactEmailDto("owner@example.invalid", ProfileContactEmailState.Pending,
-            new PendingContactVerificationDto(id, expires));
+        var contact = new ProfileContactEmailDto("owner@example.invalid", ProfileContactEmailState.Pending)
+            { PendingVerification = new PendingContactVerificationDto(id, expires) };
         using var json = JsonDocument.Parse(JsonSerializer.Serialize(contact));
         var pending = json.RootElement.GetProperty("pendingVerification");
 

@@ -61,9 +61,11 @@ public sealed record PendingContactVerificationDto(
 
 public sealed record ProfileContactEmailDto(
     [property: JsonPropertyName("address")] string? Address,
-    [property: JsonPropertyName("state")] ProfileContactEmailState State,
-    [property: JsonPropertyName("pendingVerification"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    PendingContactVerificationDto? PendingVerification = null);
+    [property: JsonPropertyName("state")] ProfileContactEmailState State)
+{
+    [JsonPropertyName("pendingVerification"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public PendingContactVerificationDto? PendingVerification { get; init; }
+}
 
 public sealed record SelfProfileDto(
     [property: JsonPropertyName("displayName")] string? DisplayName,
