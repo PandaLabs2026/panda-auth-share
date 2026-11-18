@@ -55,9 +55,17 @@ public enum ProfileContactEmailState { None, Pending, Verified }
 public sealed class ProfileContactEmailStateConverter()
     : JsonStringEnumConverter<ProfileContactEmailState>(JsonNamingPolicy.CamelCase, allowIntegerValues: false);
 
+public sealed record PendingContactVerificationDto(
+    [property: JsonPropertyName("challengeId")] Guid ChallengeId,
+    [property: JsonPropertyName("expiresAt")] DateTimeOffset ExpiresAt);
+
 public sealed record ProfileContactEmailDto(
     [property: JsonPropertyName("address")] string? Address,
-    [property: JsonPropertyName("state")] ProfileContactEmailState State);
+    [property: JsonPropertyName("state")] ProfileContactEmailState State)
+{
+    [JsonPropertyName("pendingVerification"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public PendingContactVerificationDto? PendingVerification { get; init; }
+}
 
 public sealed record SelfProfileDto(
     [property: JsonPropertyName("displayName")] string? DisplayName,
