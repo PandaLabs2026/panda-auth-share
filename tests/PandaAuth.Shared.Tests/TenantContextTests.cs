@@ -49,12 +49,20 @@ public sealed class TenantContextTests
     [InlineData("s00001")]
     [InlineData("S001")]
     [InlineData("x001")]
-    [InlineData("")]
     public void Rejects_noncanonical_zones(string zone)
     {
         var tenant = TenantId.Parse("t0042");
         Assert.False(TenantZone.IsValid(zone));
         Assert.Throws<ArgumentOutOfRangeException>(() => TenantCanonicalHost.For(tenant, TenantProduct.PandaAuth, zone));
+    }
+
+    [Fact]
+    public void Empty_zone_is_the_apex_form_not_an_error()
+    {
+        // ADR-056 追记四 (2026-11-19): 空串 zone = apex 无分区形态(正典);
+        // 旧的「空 zone 必抛」语义废止,仅非空非法值抛。
+        var tenant = TenantId.Parse("t0042");
+        Assert.Equal("t0042-auth.pandacloud.cc", TenantCanonicalHost.For(tenant, TenantProduct.PandaAuth, ""));
     }
 
     [Fact]
@@ -89,5 +97,26 @@ public sealed class TenantContextTests
             "t0042-asst.S001.pandalabs.cn",
             2,
             TenantRouteState.Ready));
+    }
+
+    [Fact]
+    public void Apex_form_context_has_an_empty_zone_and_apex_canonical_host()
+    {
+        var ctx = new TenantContext(TenantId.Parse("t0001"), TenantProduct.PandaAuth, null,
+            "t0001-auth.pandacloud.cc", 3, TenantRouteState.Ready);
+
+        Assert.True(ctx.IsApexForm);
+        Assert.Equal(string.Empty, ctx.Zone);
+        Assert.Equal("t0001-auth.pandacloud.cc", ctx.CanonicalHost);
+    }
+
+    [Fact]
+    public void Zone_form_context_keeps_working()
+    {
+        var ctx = new TenantContext(TenantId.Parse("t0000"), TenantProduct.PandaAuth, "s001",
+            "t0000-auth.s001.pandacloud.cc", 5, TenantRouteState.Ready);
+
+        Assert.False(ctx.IsApexForm);
+        Assert.Equal("s001", ctx.Zone);
     }
 }
