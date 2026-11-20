@@ -15,4 +15,17 @@ public class PandaMadeContractTests
         Assert.Equal("https://auth.pandamade.net/", contract.GetField("Issuer")!.GetRawConstantValue());
         Assert.DoesNotContain("pandamade.manage", PandaAuthScopes.FleetAll);
     }
+
+    [Theory]
+    [InlineData("ProductWebClient", "pandamade-web")]
+    [InlineData("ProductApi", "pandamade-product-api")]
+    [InlineData("ProductAccount", "pandamade.account")]
+    [InlineData("ProductSignInCallback", "https://pandamade.net/auth/signin-oidc")]
+    [InlineData("ProductSignOutCallback", "https://pandamade.net/auth/signout-callback-oidc")]
+    public void ProductAccountContractHasDedicatedValues(string field, string expected)
+    {
+        var constant = typeof(PandaMadeScopes).GetField(field);
+        Assert.NotNull(constant);
+        Assert.Equal(expected, constant.GetRawConstantValue());
+    }
 }

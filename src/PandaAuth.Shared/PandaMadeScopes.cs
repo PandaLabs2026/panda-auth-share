@@ -32,4 +32,11 @@ public static class PandaMadeScopes
     public const string AdminClient = "pandamade-admin";
     public const string Api = "pandamade-api";
     public const string Manage = "pandamade.manage";
+
+    // Product accounts use a separate Website client and API audience.
+    public const string ProductWebClient = "pandamade-web";
+    public const string ProductApi = "pandamade-product-api";
+    public const string ProductAccount = "pandamade.account";
+    public const string ProductSignInCallback = "https://pandamade.net/auth/signin-oidc";
+    public const string ProductSignOutCallback = "https://pandamade.net/auth/signout-callback-oidc";
 }
