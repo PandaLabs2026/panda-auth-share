@@ -155,7 +155,7 @@ public sealed record TenantContext
         long routeRevision, TenantRouteState state)
     {
         if (routeRevision < 1) throw new ArgumentOutOfRangeException(nameof(routeRevision));
-        if (zone is not null && !TenantZone.IsValid(zone))
+        if (!string.IsNullOrEmpty(zone) && !TenantZone.IsValid(zone))
             throw new ArgumentOutOfRangeException(nameof(zone), zone, "Zone must match sNNN (lowercase) or be null/empty for the apex form.");
         var expectedHost = TenantCanonicalHost.For(tenantId, product, zone);
         if (!string.Equals(expectedHost, canonicalHost, StringComparison.OrdinalIgnoreCase))
