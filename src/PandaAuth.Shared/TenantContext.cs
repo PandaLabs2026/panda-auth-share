@@ -61,12 +61,15 @@ public static class TenantCanonicalHost
     /// <summary>迁移窗口退役后缀（解析侧仍在白名单；F 批移出）。</summary>
     public const string RetiredZoneSuffix = "pandalabs.cn";
 
-    public static string For(TenantId tenantId, TenantProduct product, string zone)
+    /// <summary>
+    /// 正典主机名（ADR-056 追记四，2026-11-19）：zone 为空串时铸 **apex 形态**
+    /// t####-label.pandacloud.cc（不带分区段——承载机迁移永不换名）；zone 为 sNNN 时铸
+    /// 遗留分区形态 t####-label.sNNN.pandacloud.cc（t0000 直连/DR 通道）。
+    /// </summary>
+    public static string For(TenantId tenantId, TenantProduct product, string? zone)
     {
         if (tenantId.Value is null)
             throw new ArgumentException("Tenant ID must be initialized through Parse.", nameof(tenantId));
-        if (!TenantZone.IsValid(zone))
-            throw new ArgumentOutOfRangeException(nameof(zone), zone, "Zone must match sNNN.");
         var label = product switch
         {
             TenantProduct.PandaAuth => "auth",
@@ -74,12 +77,23 @@ public static class TenantCanonicalHost
             TenantProduct.PandaOasis => "oasis",
             _ => throw new ArgumentOutOfRangeException(nameof(product), product, "Unknown tenant product."),
         };
+        if (string.IsNullOrEmpty(zone))
+            return $"{tenantId.Value}-{label}.{ZoneSuffix}";
+        if (!TenantZone.IsValid(zone))
+            throw new ArgumentOutOfRangeException(nameof(zone), zone, "Zone must match sNNN or be empty for the apex form.");
         return $"{tenantId.Value}-{label}.{zone}.{ZoneSuffix}";
     }
 
+    /// <summary>apex 形态便捷方法（等价于 For(tenant, product, zone: null)）。</summary>
+    public static string ApexFor(TenantId tenantId, TenantProduct product) => For(tenantId, product, null);
+
+    /// <summary>租户门户主机（裸 t####，无产品标签）：apex 形态 t####.pandacloud.cc。</summary>
+    public static string PortalApexHost(TenantId tenantId) => $"{tenantId.Value}.{ZoneSuffix}";
+
     /// <summary>
-    /// 解析规范租户主机（t####-label.sNNN.<新|旧后缀>）。大小写不敏感，容忍单个尾点；
-    /// 端口不属于 Host.Host，调用方不得传入 host:port。非规范形态一律 false。
+    /// 解析规范租户主机。双形态（ADR-056 追记四）：apex t####-label.pandacloud.cc（三段，
+    /// zone 输出为空串）与遗留分区 t####-label.sNNN.pandacloud.cc（四段）。大小写不敏感，
+    /// 容忍单个尾点；端口不属于 Host.Host，调用方不得传入 host:port。非规范形态一律 false。
     /// </summary>
     public static bool TryParse(
         string? host, out TenantId tenantId, out TenantProduct product, out string zone)
@@ -92,9 +106,12 @@ public static class TenantCanonicalHost
         var normalized = host.Trim().ToLowerInvariant();
         if (normalized.EndsWith('.')) normalized = normalized[..^1];
         var labels = normalized.Split('.');
-        if (labels.Length != 4 ||
-            !string.Equals(labels[2], "pandacloud", StringComparison.Ordinal) ||
-            !string.Equals(labels[3], "cc", StringComparison.Ordinal)) // F2 收口:旧后缀已随旧通配删除不可达(2026-11-16)
+        var isApexForm = labels.Length == 3;
+        if (!(isApexForm || labels.Length == 4))
+            return false;
+        var suffixIndex = labels.Length - 2;
+        if (!string.Equals(labels[suffixIndex], "pandacloud", StringComparison.Ordinal) ||
+            !string.Equals(labels[suffixIndex + 1], "cc", StringComparison.Ordinal)) // F2 收口:旧后缀已随旧通配删除不可达(2026-11-16)
         {
             return false;
         }
@@ -112,8 +129,8 @@ public static class TenantCanonicalHost
             return false;
         }
 
-        var parsedZone = labels[1];
-        if (!TenantZone.IsValid(parsedZone)) return false;
+        var parsedZone = isApexForm ? string.Empty : labels[1];
+        if (!isApexForm && !TenantZone.IsValid(parsedZone)) return false;
 
         var parsedProduct = head[(dash + 1)..] switch
         {
@@ -134,18 +151,19 @@ public static class TenantCanonicalHost
 /// <summary>由服务端 hostname/Fleet binding 校验后生成的只读租户上下文。</summary>
 public sealed record TenantContext
 {
-    public TenantContext(TenantId tenantId, TenantProduct product, string zone, string canonicalHost,
+    public TenantContext(TenantId tenantId, TenantProduct product, string? zone, string canonicalHost,
         long routeRevision, TenantRouteState state)
     {
         if (routeRevision < 1) throw new ArgumentOutOfRangeException(nameof(routeRevision));
-        if (!TenantZone.IsValid(zone)) throw new ArgumentOutOfRangeException(nameof(zone), zone, "Zone must match sNNN (lowercase).");
+        if (zone is not null && !TenantZone.IsValid(zone))
+            throw new ArgumentOutOfRangeException(nameof(zone), zone, "Zone must match sNNN (lowercase) or be null/empty for the apex form.");
         var expectedHost = TenantCanonicalHost.For(tenantId, product, zone);
         if (!string.Equals(expectedHost, canonicalHost, StringComparison.OrdinalIgnoreCase))
             throw new ArgumentException("Canonical host does not match tenant, product and zone.", nameof(canonicalHost));
 
         TenantId = tenantId;
         Product = product;
-        Zone = zone;
+        Zone = zone ?? string.Empty;
         CanonicalHost = expectedHost;
         RouteRevision = routeRevision;
         State = state;
@@ -153,7 +171,13 @@ public sealed record TenantContext
 
     public TenantId TenantId { get; }
     public TenantProduct Product { get; }
+
+    /// <summary>放置分区；apex 形态租户为空串（<see cref="IsApexForm"/>）。</summary>
     public string Zone { get; }
+
+    /// <summary>apex 形态（无分区段，ADR-056 追记四）：主机名与承载机解耦，迁移永不换名。</summary>
+    public bool IsApexForm => Zone.Length == 0;
+
     public string CanonicalHost { get; }
     public long RouteRevision { get; }
     public TenantRouteState State { get; }

@@ -44,4 +44,48 @@ public sealed class TenantCanonicalHostTests
         Assert.Equal(default, tenant);
         Assert.Equal(string.Empty, zone);
     }
+
+    [Theory]
+    [InlineData("t0001-auth.pandacloud.cc", "t0001", TenantProduct.PandaAuth)]
+    [InlineData("t0001-asst.pandacloud.cc", "t0001", TenantProduct.PandaAssistant)]
+    [InlineData("t0001-oasis.pandacloud.cc", "t0001", TenantProduct.PandaOasis)]
+    public void Parses_apex_hosts_without_a_zone_segment(string host, string tenant, TenantProduct product)
+    {
+        // ADR-056 追记四 (2026-11-19): apex canonical hosts carry no zone
+        // segment; the zone output is the empty string.
+        Assert.True(TenantCanonicalHost.TryParse(host, out var tenantId, out var parsedProduct, out var parsedZone));
+        Assert.Equal(tenant, tenantId.Value);
+        Assert.Equal(product, parsedProduct);
+        Assert.Equal(string.Empty, parsedZone);
+        Assert.Equal(host, TenantCanonicalHost.ApexFor(tenantId, parsedProduct));
+    }
+
+    [Fact]
+    public void For_builds_both_forms_and_the_apex_portal_host()
+    {
+        var tenant = TenantId.Parse("t0001");
+
+        Assert.Equal("t0001-auth.pandacloud.cc", TenantCanonicalHost.For(tenant, TenantProduct.PandaAuth, null));
+        Assert.Equal("t0001-auth.pandacloud.cc", TenantCanonicalHost.ApexFor(tenant, TenantProduct.PandaAuth));
+        Assert.Equal("t0001-asst.s002.pandacloud.cc", TenantCanonicalHost.For(tenant, TenantProduct.PandaAssistant, "s002"));
+        Assert.Equal("t0001.pandacloud.cc", TenantCanonicalHost.PortalApexHost(tenant));
+    }
+
+    [Theory]
+    [InlineData("t0042-auth.pandacloud.cc.attacker.test")]
+    [InlineData("t0042-auth.pandacloud.cn")]
+    [InlineData("t0042-auth.pandacloud.cc:443")]
+    [InlineData("t0042.pandacloud.cc")]        // 裸门户主机不是产品主机,不产出产品上下文
+    [InlineData("t0042-auth..pandacloud.cc")]
+    [InlineData("t0042-auth.s001.pandacloud.cc")] // 分区形态仍合法(不属负例,断言由上组覆盖)
+    public void Apex_parsing_still_fails_non_canonical_shapes(string host)
+    {
+        if (host == "t0042-auth.s001.pandacloud.cc")
+        {
+            Assert.True(TenantCanonicalHost.TryParse(host, out _, out _, out var zone));
+            Assert.Equal("s001", zone);
+            return;
+        }
+        Assert.False(TenantCanonicalHost.TryParse(host, out _, out _, out _));
+    }
 }
