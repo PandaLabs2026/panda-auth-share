@@ -10,6 +10,7 @@ public static class PandaAuthClaims
     public const string SsoSessionId = "panda:sso_sid";
     /// <summary>用户昵称（profile scope）。</summary>
     public const string Nickname = "nickname";
+    public const string DisplayName = "display_name";
 
     /// <summary>由服务端校验后写入的租户 ID；浏览器不得自行提交或覆盖。</summary>
     public const string TenantId = "panda:tenant_id";

@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 namespace PandaAuth.Shared;
 
 /// <summary>
@@ -148,7 +150,10 @@ public sealed record AdminUserSummary(
     string? Email,
     string? Nickname,
     UserStatus Status,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt)
+{
+    public string? DisplayName { get; init; }
+}
 
 public sealed record AdminRoleSummary(string Id, string Name);
 
@@ -164,9 +169,11 @@ public sealed record AdminUserDetail(
     int AccessFailedCount,
     bool TwoFactorEnabled,
     RegisterChannel RegisterChannel,
-    string? Region,
     DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt)
+{
+    public string? DisplayName => Nickname;
+}
 
 /// <summary>冻结 / 解冻请求。只允许 Active 与 Frozen 互转（Deleted 不经此端点）。 </summary>
 public sealed record AdminUserStatusRequest(UserStatus Status);
@@ -190,13 +197,26 @@ public sealed record AdminResetPasswordResponse(string Password);
 /// <summary>
 /// 管理端建号请求。Password 空/缺省时服务端生成合规随机密码；GrantAdminRole 创建后立即授予 admin 角色。
 /// </summary>
-public sealed record AdminCreateUserRequest(
-    string UserName,
-    string? Email,
-    string? Nickname,
-    string? Region,
-    string? Password,
-    bool GrantAdminRole);
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+public sealed record AdminCreateUserRequest : AdminDisplayNameRequest
+{
+    [JsonConstructor]
+    public AdminCreateUserRequest() { }
+
+    public AdminCreateUserRequest(string UserName, string? Email, string? Nickname, string? Password, bool GrantAdminRole)
+    {
+        this.UserName = UserName;
+        this.Email = Email;
+        if (Nickname is not null) this.Nickname = Nickname;
+        this.Password = Password;
+        this.GrantAdminRole = GrantAdminRole;
+    }
+
+    public string UserName { get; init; } = "";
+    public string? Email { get; init; }
+    public string? Password { get; init; }
+    public bool GrantAdminRole { get; init; }
+}
 
 /// <summary>建号响应；Password 仅在服务端生成时返回一次，管理员指定密码时不回传明文。</summary>
 public sealed record AdminCreateUserResponse(string Id, string UserName, string? Email, string? Password);
@@ -204,8 +224,86 @@ public sealed record AdminCreateUserResponse(string Id, string UserName, string?
 /// <summary>角色变更请求：全量替换语义——Roles 即目标用户的完整角色集合。</summary>
 public sealed record AdminUserRolesRequest(IReadOnlyList<string> Roles);
 
-/// <summary>资料编辑请求：PUT 全量语义——每个字段都携带最终值，null 即清空。</summary>
-public sealed record AdminUserProfileRequest(string? Email, string? Nickname, string? Region);
+/// <summary>部分更新。未出现的字段保留原值，显式 null 清空。</summary>
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+public sealed record AdminUserProfileRequest : AdminDisplayNameRequest
+{
+    private JsonElement email;
+
+    [JsonConstructor]
+    public AdminUserProfileRequest() { }
+
+    public AdminUserProfileRequest(string? Email, string? Nickname)
+    {
+        this.Email = Email;
+        if (Nickname is not null) this.Nickname = Nickname;
+    }
+
+    [JsonIgnore]
+    public string? Email
+    {
+        get => HasEmail ? email.GetString() : null;
+        init => email = JsonSerializer.SerializeToElement(value);
+    }
+
+    [JsonPropertyName("email")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public JsonElement EmailJson
+    {
+        get => email;
+        init => email = ReadText(value);
+    }
+
+    [JsonIgnore]
+    public bool HasEmail => email.ValueKind != JsonValueKind.Undefined;
+}
+
+public abstract record AdminDisplayNameRequest
+{
+    private JsonElement displayName;
+    private JsonElement nickname;
+
+    [JsonIgnore]
+    public string? DisplayName
+    {
+        get => HasDisplayName ? displayName.GetString() : null;
+        init => displayName = JsonSerializer.SerializeToElement(value);
+    }
+
+    [JsonIgnore]
+    public string? Nickname
+    {
+        get => HasNickname ? nickname.GetString() : null;
+        init => nickname = JsonSerializer.SerializeToElement(value);
+    }
+
+    [JsonPropertyName("displayName")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public JsonElement DisplayNameJson
+    {
+        get => displayName;
+        init => displayName = ReadText(value);
+    }
+
+    [JsonPropertyName("nickname")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public JsonElement NicknameJson
+    {
+        get => nickname;
+        init => nickname = ReadText(value);
+    }
+
+    [JsonIgnore]
+    public bool HasDisplayName => displayName.ValueKind != JsonValueKind.Undefined;
+
+    [JsonIgnore]
+    public bool HasNickname => nickname.ValueKind != JsonValueKind.Undefined;
+
+    protected static JsonElement ReadText(JsonElement value)
+        => value.ValueKind is JsonValueKind.String or JsonValueKind.Null
+            ? value
+            : throw new JsonException("Profile fields must be strings or null.");
+}
 
 /// <summary>注销请求：ConfirmUserName 必须与目标用户名逐字相等（防误触主门禁）。注销为终态。</summary>
 public sealed record AdminDeactivateRequest(string ConfirmUserName);
