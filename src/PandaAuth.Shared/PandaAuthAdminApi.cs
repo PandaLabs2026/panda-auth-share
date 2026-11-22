@@ -169,7 +169,6 @@ public sealed record AdminUserDetail(
     int AccessFailedCount,
     bool TwoFactorEnabled,
     RegisterChannel RegisterChannel,
-    string? Region,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt)
 {
@@ -198,24 +197,23 @@ public sealed record AdminResetPasswordResponse(string Password);
 /// <summary>
 /// 管理端建号请求。Password 空/缺省时服务端生成合规随机密码；GrantAdminRole 创建后立即授予 admin 角色。
 /// </summary>
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public sealed record AdminCreateUserRequest : AdminDisplayNameRequest
 {
     [JsonConstructor]
     public AdminCreateUserRequest() { }
 
-    public AdminCreateUserRequest(string UserName, string? Email, string? Nickname, string? Region, string? Password, bool GrantAdminRole)
+    public AdminCreateUserRequest(string UserName, string? Email, string? Nickname, string? Password, bool GrantAdminRole)
     {
         this.UserName = UserName;
         this.Email = Email;
         if (Nickname is not null) this.Nickname = Nickname;
-        this.Region = Region;
         this.Password = Password;
         this.GrantAdminRole = GrantAdminRole;
     }
 
     public string UserName { get; init; } = "";
     public string? Email { get; init; }
-    public string? Region { get; init; }
     public string? Password { get; init; }
     public bool GrantAdminRole { get; init; }
 }
@@ -226,21 +224,38 @@ public sealed record AdminCreateUserResponse(string Id, string UserName, string?
 /// <summary>角色变更请求：全量替换语义——Roles 即目标用户的完整角色集合。</summary>
 public sealed record AdminUserRolesRequest(IReadOnlyList<string> Roles);
 
-/// <summary>邮箱和地区使用最终值，未提供显示名时保留原值。</summary>
+/// <summary>部分更新。未出现的字段保留原值，显式 null 清空。</summary>
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public sealed record AdminUserProfileRequest : AdminDisplayNameRequest
 {
+    private JsonElement email;
+
     [JsonConstructor]
     public AdminUserProfileRequest() { }
 
-    public AdminUserProfileRequest(string? Email, string? Nickname, string? Region)
+    public AdminUserProfileRequest(string? Email, string? Nickname)
     {
         this.Email = Email;
-        this.Nickname = Nickname;
-        this.Region = Region;
+        if (Nickname is not null) this.Nickname = Nickname;
     }
 
-    public string? Email { get; init; }
-    public string? Region { get; init; }
+    [JsonIgnore]
+    public string? Email
+    {
+        get => HasEmail ? email.GetString() : null;
+        init => email = JsonSerializer.SerializeToElement(value);
+    }
+
+    [JsonPropertyName("email")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public JsonElement EmailJson
+    {
+        get => email;
+        init => email = ReadText(value);
+    }
+
+    [JsonIgnore]
+    public bool HasEmail => email.ValueKind != JsonValueKind.Undefined;
 }
 
 public abstract record AdminDisplayNameRequest
@@ -267,7 +282,7 @@ public abstract record AdminDisplayNameRequest
     public JsonElement DisplayNameJson
     {
         get => displayName;
-        init => displayName = ReadName(value);
+        init => displayName = ReadText(value);
     }
 
     [JsonPropertyName("nickname")]
@@ -275,7 +290,7 @@ public abstract record AdminDisplayNameRequest
     public JsonElement NicknameJson
     {
         get => nickname;
-        init => nickname = ReadName(value);
+        init => nickname = ReadText(value);
     }
 
     [JsonIgnore]
@@ -284,10 +299,10 @@ public abstract record AdminDisplayNameRequest
     [JsonIgnore]
     public bool HasNickname => nickname.ValueKind != JsonValueKind.Undefined;
 
-    private static JsonElement ReadName(JsonElement value)
+    protected static JsonElement ReadText(JsonElement value)
         => value.ValueKind is JsonValueKind.String or JsonValueKind.Null
             ? value
-            : throw new JsonException("Display name must be a string or null.");
+            : throw new JsonException("Profile fields must be strings or null.");
 }
 
 /// <summary>注销请求：ConfirmUserName 必须与目标用户名逐字相等（防误触主门禁）。注销为终态。</summary>
