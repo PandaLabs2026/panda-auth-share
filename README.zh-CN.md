@@ -56,3 +56,5 @@ dotnet build PandaAuth.Shared.slnx
 ## 当前预发布版本与F2主机契约
 
 当前源码候选0.2.0-preview.1；包消费显式精确选择 `[0.2.0-preview.1]`。F2已收口：For输出pandacloud.cc，TryParse拒绝退役pandalabs.cn后缀；TenantContext仍要求规范地址。PandaMade的RetiredCloudIssuer不在KnownIssuers。版本重定基不恢复退役主机或扩大issuer/redirect信任。
+
+Pandy更名并存窗口内（meta ADR-092），`TenantCanonicalHost.TryParse`在`-asst`之外同时把`-pandy`标签解析为`TenantProduct.PandaAssistant`。激活批次前`For`仍输出`-asst`，`TenantContext`仍要求该规范地址。`TenantCanonicalHost.AcceptedHosts`列出解析对给定租户、产品与分区接受的全部主机形态，规范形态在前；需要比对或登记回调主机的调用方用它代替单一的`For`结果。此源码新增不改变已发布的包。

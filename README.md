@@ -60,3 +60,5 @@ The additive self-profile proposal exports `PandaAuthProfileApi`, `ProfileScopes
 ## Current preview version and F2 host contract
 
 Source candidate **0.2.0-preview.1** follows the organization premarket 0.x policy; old 1.x artifacts remain historical. Pin package consumption to `[0.2.0-preview.1]`. F2 generates pandacloud.cc canonical hosts and rejects the retired pandalabs.cn suffix. TenantContext requires the canonical host; PandaMade KnownIssuers excludes RetiredCloudIssuer. The version rebase does not restore retired inputs or expand issuer/redirect trust.
+
+During the Pandy rename dual-accept window (Meta ADR-092) `TenantCanonicalHost.TryParse` also accepts the `-pandy` label as `TenantProduct.PandaAssistant`, next to `-asst`. `For` keeps emitting `-asst` until the activation batch, and `TenantContext` still requires that canonical host. `TenantCanonicalHost.AcceptedHosts` lists every host form parsing accepts for a tenant, product and zone, canonical form first; callers that compare or register callback hosts use it instead of a single `For` result. This source addition leaves existing published packages unchanged.
