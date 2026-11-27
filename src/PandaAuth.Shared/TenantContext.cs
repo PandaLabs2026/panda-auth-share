@@ -80,15 +80,36 @@ public static class TenantCanonicalHost
             TenantProduct.PandaOasis => "oasis",
             _ => throw new ArgumentOutOfRangeException(nameof(product), product, "Unknown tenant product."),
         };
-        if (string.IsNullOrEmpty(zone))
-            return $"{tenantId.Value}-{label}.{ZoneSuffix}";
-        if (!TenantZone.IsValid(zone))
-            throw new ArgumentOutOfRangeException(nameof(zone), zone, "Zone must match sNNN or be empty for the apex form.");
-        return $"{tenantId.Value}-{label}.{zone}.{ZoneSuffix}";
+        return Form(tenantId.Value, label, zone);
     }
 
     /// <summary>apex 形态便捷方法（等价于 For(tenant, product, zone: null)）。</summary>
     public static string ApexFor(TenantId tenantId, TenantProduct product) => For(tenantId, product, null);
+
+    /// <summary>熊猫助理的并存标签（ADR-092）：TryParse 与 AcceptedHosts 共用这一个取值。</summary>
+    private const string AssistantDualLabel = "pandy";
+
+    /// <summary>
+    /// 并存窗口内解析会接受的全部规范主机形态（ADR-092）：首项恒为 <see cref="For"/> 的输出，
+    /// 其后是并存标签形态——目前只有熊猫助理的 -pandy。供需要逐一比对或登记回调主机的调用方
+    /// 使用（回调白名单展开、回调放行策略）；需要单一规范名时仍用 For。
+    /// </summary>
+    public static IReadOnlyList<string> AcceptedHosts(TenantId tenantId, TenantProduct product, string? zone)
+    {
+        var canonical = For(tenantId, product, zone);
+        return product == TenantProduct.PandaAssistant
+            ? [canonical, Form(tenantId.Value, AssistantDualLabel, zone)]
+            : [canonical];
+    }
+
+    private static string Form(string tenant, string label, string? zone)
+    {
+        if (string.IsNullOrEmpty(zone))
+            return $"{tenant}-{label}.{ZoneSuffix}";
+        if (!TenantZone.IsValid(zone))
+            throw new ArgumentOutOfRangeException(nameof(zone), zone, "Zone must match sNNN or be empty for the apex form.");
+        return $"{tenant}-{label}.{zone}.{ZoneSuffix}";
+    }
 
     /// <summary>租户门户主机（裸 t####，无产品标签）：apex 形态 t####.pandacloud.cc。</summary>
     public static string PortalApexHost(TenantId tenantId) => $"{tenantId.Value}.{ZoneSuffix}";
@@ -141,7 +162,7 @@ public static class TenantCanonicalHost
             "auth" => TenantProduct.PandaAuth,
             "asst" => TenantProduct.PandaAssistant,
             // 并存标签（meta ADR-092）：-pandy 是熊猫助理 -asst 的并存写法；输出见 For，仍为 asst。
-            "pandy" => TenantProduct.PandaAssistant,
+            AssistantDualLabel => TenantProduct.PandaAssistant,
             "oasis" => TenantProduct.PandaOasis,
             _ => (TenantProduct)(-1),
         };

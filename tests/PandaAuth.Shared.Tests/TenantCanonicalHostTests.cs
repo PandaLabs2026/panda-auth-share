@@ -124,4 +124,54 @@ public sealed class TenantCanonicalHostTests
     {
         Assert.False(TenantCanonicalHost.TryParse(host, out _, out _, out _));
     }
+
+    [Theory]
+    [InlineData(TenantProduct.PandaAuth, null, "t0042-auth.pandacloud.cc")]
+    [InlineData(TenantProduct.PandaOasis, "s003", "t0042-oasis.s003.pandacloud.cc")]
+    public void AcceptedHosts_lists_only_the_canonical_form_for_products_without_a_dual_label(
+        TenantProduct product, string? zone, string canonical)
+    {
+        var hosts = TenantCanonicalHost.AcceptedHosts(TenantId.Parse("t0042"), product, zone);
+
+        Assert.Equal(new[] { canonical }, hosts);
+    }
+
+    [Theory]
+    [InlineData(null, "t0042-asst.pandacloud.cc", "t0042-pandy.pandacloud.cc")]
+    [InlineData("s003", "t0042-asst.s003.pandacloud.cc", "t0042-pandy.s003.pandacloud.cc")]
+    public void AcceptedHosts_puts_the_canonical_form_first_and_the_dual_label_form_after_it(
+        string? zone, string canonical, string dual)
+    {
+        var hosts = TenantCanonicalHost.AcceptedHosts(TenantId.Parse("t0042"), TenantProduct.PandaAssistant, zone);
+
+        Assert.Equal(new[] { canonical, dual }, hosts);
+    }
+
+    [Fact]
+    public void Every_accepted_host_parses_back_to_the_same_tenant_product_and_zone()
+    {
+        foreach (var product in Enum.GetValues<TenantProduct>())
+        {
+            foreach (var zone in new string?[] { null, string.Empty, "s001" })
+            {
+                var tenant = TenantId.Parse("t1234");
+                foreach (var host in TenantCanonicalHost.AcceptedHosts(tenant, product, zone))
+                {
+                    Assert.True(TenantCanonicalHost.TryParse(host, out var parsedTenant, out var parsedProduct, out var parsedZone));
+                    Assert.Equal(tenant, parsedTenant);
+                    Assert.Equal(product, parsedProduct);
+                    Assert.Equal(zone ?? string.Empty, parsedZone);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void AcceptedHosts_validates_the_zone_like_For()
+    {
+        var tenant = TenantId.Parse("t0042");
+
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => TenantCanonicalHost.AcceptedHosts(tenant, TenantProduct.PandaAssistant, "s01"));
+    }
 }
