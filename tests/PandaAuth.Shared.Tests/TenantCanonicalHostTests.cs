@@ -88,4 +88,40 @@ public sealed class TenantCanonicalHostTests
         }
         Assert.False(TenantCanonicalHost.TryParse(host, out _, out _, out _));
     }
+
+    [Theory]
+    [InlineData("t0042-pandy.pandacloud.cc", "t0042", "")]
+    [InlineData("t0042-pandy.pandacloud.cc.", "t0042", "")]
+    [InlineData("t0042-pandy.s001.pandacloud.cc", "t0042", "s001")]
+    [InlineData("T0042-PANDY.S001.PandaCloud.CC", "t0042", "s001")]
+    public void Parses_the_dual_pandy_label_as_the_assistant_product(string host, string tenant, string zone)
+    {
+        // ADR-092 dual-accept window: -pandy is the registered spelling of the
+        // Assistant product next to -asst. Parsing accepts both; For() still emits -asst.
+        Assert.True(TenantCanonicalHost.TryParse(host, out var tenantId, out var product, out var parsedZone));
+        Assert.Equal(tenant, tenantId.Value);
+        Assert.Equal(TenantProduct.PandaAssistant, product);
+        Assert.Equal(zone, parsedZone);
+    }
+
+    [Fact]
+    public void For_still_emits_the_asst_label_during_the_dual_accept_window()
+    {
+        var tenant = TenantId.Parse("t0042");
+
+        Assert.Equal("t0042-asst.pandacloud.cc", TenantCanonicalHost.ApexFor(tenant, TenantProduct.PandaAssistant));
+        Assert.Equal("t0042-asst.s001.pandacloud.cc", TenantCanonicalHost.For(tenant, TenantProduct.PandaAssistant, "s001"));
+    }
+
+    [Theory]
+    [InlineData("t0042-pandyy.pandacloud.cc")]
+    [InlineData("t0042-pandy-.pandacloud.cc")]
+    [InlineData("t0042--pandy.pandacloud.cc")]
+    [InlineData("t0042-pandy.s01.pandacloud.cc")]
+    [InlineData("t0042-pandy.pandacloud.cn")]
+    [InlineData("t0042-pandy.s001.pandacloud.cc.attacker.test")]
+    public void Rejects_pandy_lookalikes(string host)
+    {
+        Assert.False(TenantCanonicalHost.TryParse(host, out _, out _, out _));
+    }
 }

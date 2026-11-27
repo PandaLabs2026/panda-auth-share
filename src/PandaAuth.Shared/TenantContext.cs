@@ -53,6 +53,8 @@ public enum TenantRouteState
 /// 规范形态（拓扑 v2 / ⑤租户平移 2026-11-15）：t####-&lt;label&gt;.sNNN.pandacloud.cc，label 按产品取 auth/asst/oasis。
 /// 迁移窗口内 sNNN.pandalabs.cn 旧后缀仍在解析白名单（F 退役批移出）。
 /// 历史无分区应用级主机已随 ADR-061 退役，不再是契约形态。
+/// 并存标签（meta ADR-092，2026-11-27）：解析同时接受 -pandy，它是熊猫助理产品 -asst 的并存新写法；
+/// 输出（For）在激活批次前仍铸 -asst。
 /// </summary>
 public static class TenantCanonicalHost
 {
@@ -65,6 +67,7 @@ public static class TenantCanonicalHost
     /// 正典主机名（ADR-056 追记四，2026-11-19）：zone 为空串时铸 **apex 形态**
     /// t####-label.pandacloud.cc（不带分区段——承载机迁移永不换名）；zone 为 sNNN 时铸
     /// 遗留分区形态 t####-label.sNNN.pandacloud.cc（t0000 直连/DR 通道）。
+    /// 并存窗口内熊猫助理的输出标签仍为 asst（ADR-092）；解析侧的双收不影响本方法的输出。
     /// </summary>
     public static string For(TenantId tenantId, TenantProduct product, string? zone)
     {
@@ -94,6 +97,7 @@ public static class TenantCanonicalHost
     /// 解析规范租户主机。双形态（ADR-056 追记四）：apex t####-label.pandacloud.cc（三段，
     /// zone 输出为空串）与遗留分区 t####-label.sNNN.pandacloud.cc（四段）。大小写不敏感，
     /// 容忍单个尾点；端口不属于 Host.Host，调用方不得传入 host:port。非规范形态一律 false。
+    /// 标签双收（ADR-092）：asst 与 pandy 都解析为 PandaAssistant。
     /// </summary>
     public static bool TryParse(
         string? host, out TenantId tenantId, out TenantProduct product, out string zone)
@@ -136,6 +140,8 @@ public static class TenantCanonicalHost
         {
             "auth" => TenantProduct.PandaAuth,
             "asst" => TenantProduct.PandaAssistant,
+            // 并存标签（meta ADR-092）：-pandy 是熊猫助理 -asst 的并存写法；输出见 For，仍为 asst。
+            "pandy" => TenantProduct.PandaAssistant,
             "oasis" => TenantProduct.PandaOasis,
             _ => (TenantProduct)(-1),
         };
