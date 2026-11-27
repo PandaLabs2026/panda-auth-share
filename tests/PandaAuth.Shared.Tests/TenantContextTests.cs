@@ -119,4 +119,31 @@ public sealed class TenantContextTests
         Assert.False(ctx.IsApexForm);
         Assert.Equal("s001", ctx.Zone);
     }
+
+    [Fact]
+    public void Context_for_the_assistant_product_keeps_the_asst_canonical_host()
+    {
+        // Consumers build the context from For(), not from the request spelling, so a
+        // -pandy request resolves to the same context as -asst during the dual-accept window.
+        var tenant = TenantId.Parse("t0042");
+        Assert.True(TenantCanonicalHost.TryParse("t0042-pandy.s001.pandacloud.cc", out var parsedTenant, out var product, out var zone));
+        var ctx = new TenantContext(parsedTenant, product, zone,
+            TenantCanonicalHost.For(parsedTenant, product, zone), 1, TenantRouteState.Ready);
+
+        Assert.Equal(tenant, parsedTenant);
+        Assert.Equal("t0042-asst.s001.pandacloud.cc", ctx.CanonicalHost);
+    }
+
+    [Fact]
+    public void Context_rejects_the_dual_label_spelling_as_the_canonical_host()
+    {
+        // canonicalHost must be the emitted form; the request spelling is not canonical.
+        Assert.Throws<ArgumentException>(() => new TenantContext(
+            TenantId.Parse("t0042"),
+            TenantProduct.PandaAssistant,
+            "",
+            "t0042-pandy.pandacloud.cc",
+            1,
+            TenantRouteState.Ready));
+    }
 }

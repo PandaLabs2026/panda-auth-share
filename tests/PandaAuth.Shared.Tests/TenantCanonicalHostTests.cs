@@ -88,4 +88,90 @@ public sealed class TenantCanonicalHostTests
         }
         Assert.False(TenantCanonicalHost.TryParse(host, out _, out _, out _));
     }
+
+    [Theory]
+    [InlineData("t0042-pandy.pandacloud.cc", "t0042", "")]
+    [InlineData("t0042-pandy.pandacloud.cc.", "t0042", "")]
+    [InlineData("t0042-pandy.s001.pandacloud.cc", "t0042", "s001")]
+    [InlineData("T0042-PANDY.S001.PandaCloud.CC", "t0042", "s001")]
+    public void Parses_the_dual_pandy_label_as_the_assistant_product(string host, string tenant, string zone)
+    {
+        // ADR-092 dual-accept window: -pandy is the registered spelling of the
+        // Assistant product next to -asst. Parsing accepts both; For() still emits -asst.
+        Assert.True(TenantCanonicalHost.TryParse(host, out var tenantId, out var product, out var parsedZone));
+        Assert.Equal(tenant, tenantId.Value);
+        Assert.Equal(TenantProduct.PandaAssistant, product);
+        Assert.Equal(zone, parsedZone);
+    }
+
+    [Fact]
+    public void For_still_emits_the_asst_label_during_the_dual_accept_window()
+    {
+        var tenant = TenantId.Parse("t0042");
+
+        Assert.Equal("t0042-asst.pandacloud.cc", TenantCanonicalHost.ApexFor(tenant, TenantProduct.PandaAssistant));
+        Assert.Equal("t0042-asst.s001.pandacloud.cc", TenantCanonicalHost.For(tenant, TenantProduct.PandaAssistant, "s001"));
+    }
+
+    [Theory]
+    [InlineData("t0042-pandyy.pandacloud.cc")]
+    [InlineData("t0042-pandy-.pandacloud.cc")]
+    [InlineData("t0042--pandy.pandacloud.cc")]
+    [InlineData("t0042-pandy.s01.pandacloud.cc")]
+    [InlineData("t0042-pandy.pandacloud.cn")]
+    [InlineData("t0042-pandy.s001.pandacloud.cc.attacker.test")]
+    public void Rejects_pandy_lookalikes(string host)
+    {
+        Assert.False(TenantCanonicalHost.TryParse(host, out _, out _, out _));
+    }
+
+    [Theory]
+    [InlineData(TenantProduct.PandaAuth, null, "t0042-auth.pandacloud.cc")]
+    [InlineData(TenantProduct.PandaOasis, "s003", "t0042-oasis.s003.pandacloud.cc")]
+    public void AcceptedHosts_lists_only_the_canonical_form_for_products_without_a_dual_label(
+        TenantProduct product, string? zone, string canonical)
+    {
+        var hosts = TenantCanonicalHost.AcceptedHosts(TenantId.Parse("t0042"), product, zone);
+
+        Assert.Equal(new[] { canonical }, hosts);
+    }
+
+    [Theory]
+    [InlineData(null, "t0042-asst.pandacloud.cc", "t0042-pandy.pandacloud.cc")]
+    [InlineData("s003", "t0042-asst.s003.pandacloud.cc", "t0042-pandy.s003.pandacloud.cc")]
+    public void AcceptedHosts_puts_the_canonical_form_first_and_the_dual_label_form_after_it(
+        string? zone, string canonical, string dual)
+    {
+        var hosts = TenantCanonicalHost.AcceptedHosts(TenantId.Parse("t0042"), TenantProduct.PandaAssistant, zone);
+
+        Assert.Equal(new[] { canonical, dual }, hosts);
+    }
+
+    [Fact]
+    public void Every_accepted_host_parses_back_to_the_same_tenant_product_and_zone()
+    {
+        foreach (var product in Enum.GetValues<TenantProduct>())
+        {
+            foreach (var zone in new string?[] { null, string.Empty, "s001" })
+            {
+                var tenant = TenantId.Parse("t1234");
+                foreach (var host in TenantCanonicalHost.AcceptedHosts(tenant, product, zone))
+                {
+                    Assert.True(TenantCanonicalHost.TryParse(host, out var parsedTenant, out var parsedProduct, out var parsedZone));
+                    Assert.Equal(tenant, parsedTenant);
+                    Assert.Equal(product, parsedProduct);
+                    Assert.Equal(zone ?? string.Empty, parsedZone);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void AcceptedHosts_validates_the_zone_like_For()
+    {
+        var tenant = TenantId.Parse("t0042");
+
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => TenantCanonicalHost.AcceptedHosts(tenant, TenantProduct.PandaAssistant, "s01"));
+    }
 }
